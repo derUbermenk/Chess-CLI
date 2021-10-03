@@ -3,6 +3,17 @@ module Chess_IO
     gets.chomp
   end
 
+  # returns input if input passes given block
+  # which serves as condition for a valid format
+  # @param input [String]
+  def verify_input(input)
+    loop do
+     return input if yield input
+     
+     puts 'invalid input'
+    end
+  end
+
   # prints the checkmate message
   # @param winner [Player]
   def checkmate_message(winner)
@@ -21,9 +32,14 @@ module Chess_IO
     puts 'Invalid input'
   end
 
+  # main methods
+
   # displays a load interface for choosing
   # ... which save to load
   # @param save_list [Array]
+  def main_instructions
+    puts "load game[l]\nnew game[n]"
+  end
   def display_load_interface(save_list)
     formatted_save_list = list_formatter(save_list) do |save_name, index| 
       "[#{index}] - #{save_name.match(%r{^saves/(\w+).yml$})[1]}"
