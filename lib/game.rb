@@ -33,12 +33,12 @@ class Game
   # else assumes that player entered move input
   def player_turn
     loop do
-      player_input = get_input
-      save_game if player_input.match?(/^ss-\w+$/)
+      player_input = input
+      save(player_input) if player_input.match?(/^ss-\w+$/)
       undo_game if player_input.match?(/^uz$/)
-    
+
       # current player's move will have its own method for checking validity of move
-      return current_player.move(player_input) if player_input.match?(/^[kqnbrp][12]-[a-h][1-8]-[a-h][1-8]$/)
+      return current_player.move(player_input) if player_input.match?(/^[kqnbrp][1-8]-[a-h][1-8]-[a-h][1-8]$/)
 
       report_invalid_input
       report_instructions
@@ -59,12 +59,24 @@ class Game
     end
   end
 
+  def save(input)
+    Dir.mkdir('saves') unless Dir.exist?('saves')
+
+    save_name = input.split('-').last
+    File.open("saves/#{save_name}.yml", 'w') { |file| file.write(self.to_yaml) }
+
+    puts "Save successful: #{save_name}"
+  end
+
   private
   # saves a game
-  def save_game; end
+
+  def player_move(input)
+    current_player.move(input)
+  end
 
   # use this method for getting input
-  def get_input
+  def input
     gets.chomp
   end
 
