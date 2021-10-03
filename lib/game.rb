@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'board'
+require_relative 'player'
 # Contains all logic for playing a chess game, connects all
 # ... serves as interface for all relevant chess objects to
 # ... interact with each other
@@ -30,11 +32,17 @@ class Game
   # moves. matches input to save game or undo move inputs
   # else assumes that player entered move input
   def player_turn
-    player_input = gets.chomp
-    save_game if player_input.match?(ss-<filename>)
-    undo_game if player_input.mathc?(uz)
+    loop do
+      player_input = get_input
+      save_game if player_input.match?(/^ss-\w+$/)
+      undo_game if player_input.match?(/^uz$/)
     
-    current_player.move(player_input)
+      # current player's move will have its own method for checking validity of move
+      return current_player.move(player_input) if player_input.match?(/^[kqnbrp][12]-[a-h][1-8]-[a-h][1-8]$/)
+
+      report_invalid_input
+      report_instructions
+    end
   end
 
   # checks if an end game condition has been met
@@ -53,7 +61,11 @@ class Game
 
   private
   # saves a game
-  def save_game 
+  def save_game; end
+
+  # use this method for getting input
+  def get_input
+    gets.chomp
   end
 
   # not implemented yet
@@ -69,5 +81,13 @@ class Game
 
   def stalemate_message
     'Stalemate! Draw'
+  end
+
+  def report_instructions
+    puts 'instructions'
+  end
+
+  def report_invalid_input
+    puts 'invalid input'
   end
 end
