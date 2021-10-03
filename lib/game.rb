@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
+require_relative 'chess_IO'
 require_relative 'board'
 require_relative 'player'
 # Contains all logic for playing a chess game, connects all
 # ... serves as interface for all relevant chess objects to
 # ... interact with each other
 class Game
+  include Chess_IO
+
   def initialize
     @player1 = Player.new
     @player2 = Player.new
@@ -40,8 +43,8 @@ class Game
       # current player's move will have its own method for checking validity of move
       return current_player.move(player_input) if player_input.match?(/^[kqnbrp][1-8]-[a-h][1-8]-[a-h][1-8]$/)
 
-      report_invalid_input
-      report_instructions
+      invalid_input_message
+      instructions_message
     end
   end
 
@@ -68,38 +71,16 @@ class Game
     puts "Save successful: #{save_name}"
   end
 
+  # not implemented yet
+  def undo_move; end
+
   private
-  # saves a game
 
   def player_move(input)
     current_player.move(input)
   end
 
-  # use this method for getting input
-  def input
-    gets.chomp
-  end
-
-  # not implemented yet
-  def undo_move; end
-
   def current_player
     @player_que.first
-  end
-
-  def checkmate_message(winner)
-    "Checkmate! #{winner.name} wins"
-  end
-
-  def stalemate_message
-    'Stalemate! Draw'
-  end
-
-  def report_instructions
-    puts 'instructions'
-  end
-
-  def report_invalid_input
-    puts 'invalid input'
   end
 end

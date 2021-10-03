@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require_relative '../lib/game'
+
+require_relative '../lib/main'
 
 describe Game do
   describe '#play' do
@@ -39,8 +40,8 @@ describe Game do
 
       it 'makes current player call move and the proper move input' do
         expect_any_instance_of(Player).to receive(:move).with(valid_move_format).once
-        expect(game).to_not receive(:report_invalid_input)
-        expect(game).to_not receive(:report_instructions)
+        expect(game).to_not receive(:invalid_input_message)
+        expect(game).to_not receive(:instructions_message)
 
         game.player_turn
       end
@@ -53,8 +54,8 @@ describe Game do
       end
       it 'reports the invalid input and instruction twice and then allows the input' do
         expect_any_instance_of(Player).to receive(:move).with(valid_move_format).once
-        expect(game).to receive(:report_invalid_input).twice
-        expect(game).to receive(:report_instructions).twice
+        expect(game).to receive(:invalid_input_message).twice
+        expect(game).to receive(:instructions_message).twice
         game.player_turn
       end
     end

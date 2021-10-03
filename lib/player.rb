@@ -3,5 +3,5 @@
 class Player
   def initialize; end
 
-  def move; end
+  def move(input); end
 end
