@@ -6,11 +6,12 @@ module Chess_IO
   # returns input if input passes given block
   # which serves as condition for a valid format
   # @param input [String]
-  def verify_input(input)
+  def verify_input(input, message = 'invalid input')
     loop do
-     return input if yield input
-     
-     puts 'invalid input'
+      return input if yield input
+
+      puts message
+      input = gets.chomp
     end
   end
 

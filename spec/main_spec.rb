@@ -67,7 +67,7 @@ describe Main do
     let(:save_list) { ['saves/save1.yml', 'saves/save2.yml'] }
 
     it 'displays a load interface for choosing which save game to load' do; end
-    
+
     context 'when there are to save files' do
       it 'returns outputs the expected puts argument' do
         expected_puts_argument = "[0] - save1\n[1] - save2"
