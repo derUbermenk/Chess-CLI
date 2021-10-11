@@ -38,23 +38,15 @@ class Player
   def checkmate?
     king = @pieces['k1']
 
-    case king.check?
-    when true
-      # checks if there are no more valid moves
-      @pieces.values.inject(true) do |emptyness, piece|
-        emptyness and piece.valid_moves.empty
-      end
-    when false
-      return false
-    end
+    return no_more_moves? if king.check?
+
+    false
   end
 
   # a stalemate condition is reached when all of player's pieces #valid method
   # are empty
   def stalemate?
-    @pieces.values.inject(true) do |emptyness, piece|
-      emptyness and piece.valid_moves.empty
-    end
+    no_more_moves?
   end
 
   private
@@ -66,7 +58,13 @@ class Player
   # @param input [String] move input
   # @return [Hash] with key piece and to_position
   def format(input)
-    info = input.split('-')
-    { piece: info[0], to_position: info[1] }
+    move_information = input.split('-')
+    { piece: move_information[0], to_position: move_information[1] }
+  end
+
+  # checks if there are no more moves available for player
+  def no_more_moves?
+    remaining_pieces = @pieces.values
+    remaining_pieces.map(&:valid_moves).all?(&:empty?)
   end
 end
