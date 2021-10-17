@@ -33,6 +33,10 @@ module Chess_IO
     puts 'Invalid input'
   end
 
+  def invalid_move_message
+    puts 'invalid move'
+  end
+
   # main methods
 
   # displays a load interface for choosing

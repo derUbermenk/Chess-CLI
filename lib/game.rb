@@ -10,8 +10,8 @@ class Game
   include Chess_IO
 
   def initialize
-    @player1 = Player.new
-    @player2 = Player.new
+    @player1 = Player.new('white')
+    @player2 = Player.new('black')
     @board = Board.new
 
     @player_que = [@player1, @player2]
@@ -41,7 +41,7 @@ class Game
       undo_game if player_input.match?(/^uz$/)
 
       # current player's move will have its own method for checking validity of move
-      return current_player.move(player_input) if player_input.match?(/^[kqnbrp][1-8]-[a-h][1-8]-[a-h][1-8]$/)
+      return current_player.move(player_input) if player_input.match?(/^[kqnbrp][1-8]-[a-h][1-8]$/)
 
       invalid_input_message
       instructions_message
