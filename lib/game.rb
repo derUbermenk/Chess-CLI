@@ -41,7 +41,7 @@ class Game
       undo_game if player_input.match?(/^uz$/)
 
       # current player's move will have its own method for checking validity of move
-      return current_player.move(player_input) if player_input.match?(/^[kqnbrp][1-8]-[a-h][1-8]$/)
+      return current_player.move(player_input) if player_input.match?(/^[kqnbrp]-[a-h][1-8]-[a-h][1-8]$/)
 
       invalid_input_message
       instructions_message
