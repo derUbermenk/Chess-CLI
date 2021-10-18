@@ -14,7 +14,7 @@ describe Game do
 
   describe '#player_turn' do
     subject(:game) { described_class.new }
-    let(:valid_move_format) { 'p3-d4-d5' }
+    let(:valid_move_format) { 'p-d4-d5' }
     let(:valid_save_format) { 'ss-saveGame1' }
     let(:invalid_move_format) { 'rr2-d7-d8' }
 

@@ -37,10 +37,9 @@ class Game
   def player_turn
     loop do
       player_input = input
-      save(player_input) if player_input.match?(/^ss-\w+$/)
+      save player_input if player_input.match?(/^ss-\w+$/)
       undo_game if player_input.match?(/^uz$/)
 
-      # current player's move will have its own method for checking validity of move
       return current_player.move(player_input) if player_input.match?(/^[kqnbrp]-[a-h][1-8]-[a-h][1-8]$/)
 
       invalid_input_message
