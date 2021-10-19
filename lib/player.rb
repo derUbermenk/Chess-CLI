@@ -4,7 +4,7 @@ require_relative '../lib/pieces/king'
 require_relative '../lib/chess_IO'
 
 class Player
-  include Chess_IO
+  include ChessIO
 
   # @param color [String]
   # @param king [King]

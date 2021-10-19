@@ -5,7 +5,7 @@ require_relative 'game'
 require_relative 'chess_IO'
 
 class Main
-  include Chess_IO
+  include ChessIO
 
   def run
     main_instructions

@@ -7,7 +7,7 @@ require_relative 'player'
 # ... serves as interface for all relevant chess objects to
 # ... interact with each other
 class Game
-  include Chess_IO
+  include ChessIO
 
   def initialize
     @board = Board.new

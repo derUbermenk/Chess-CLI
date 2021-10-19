@@ -1,4 +1,4 @@
-module Chess_IO 
+module ChessIO 
   SAVE_SYNTAX = /^ss-\w+$/
   UNDO_SYNTAX = /^uz$/
   MOVE_SYNTAX = /^[kqnbrp]-[a-h][1-8]-[a-h][1-8]$/
