@@ -53,7 +53,7 @@ class Board
     rows.each do |row|
       columns.each do |column|
         cell_name = column.concat(row)
-        board_db[cell_name] = Cell.new(self, cell_name)
+        board_db[cell_name] = Cell.new(cell_name)
       end
     end
   end
@@ -61,7 +61,9 @@ class Board
   def create_board_cartesian
     cells = @board_db.values
 
-    Array.new(8) { cells.slice!(0..7)}
+    Array.new(8) do |row|
+      cells.slice!(0..7).each_with_index { |cell, column| cell.coordinate = [row, column] }
+    end
   end
 
   def create_pieces
