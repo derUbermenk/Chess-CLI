@@ -23,19 +23,13 @@ class Player
       return execute(player_move, board) if valid(player_move, board)
 
       input = verify_input('', 'invalid move') do |player_input|
-        player_input.match?(/^[kqnbrp]-[a-h][1-8]-[a-h][1-8]$/)
+        player_input.match?(MOVE_SYNTAX)
       end
     end
   end
 
   def checkmate?
-    # king is in check
-    # kings valid moves is empty
-    # kings remove check moves is empty
-  end
-
-  def stalemate? 
-    # all white pieces have empty valid moves 
+    king.checkmate?
   end
 
   # checks input validity

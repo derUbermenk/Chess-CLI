@@ -10,9 +10,9 @@ class Game
   include Chess_IO
 
   def initialize
-    @player1 = Player.new('white')
-    @player2 = Player.new('black')
     @board = Board.new
+    @player1 = Player.new('white', board.king(:white))
+    @player2 = Player.new('black', board.king(:black))
 
     @player_que = [@player1, @player2]
   end
@@ -37,10 +37,10 @@ class Game
   def player_turn
     loop do
       player_input = input
-      save player_input if player_input.match?(/^ss-\w+$/)
-      undo_game if player_input.match?(/^uz$/)
+      save player_input if player_input.match?(SAVE_SYNTAX)
+      undo_game if player_input.match?(UNDO_SYNTAX)
 
-      return current_player.move(player_input) if player_input.match?(/^[kqnbrp]-[a-h][1-8]-[a-h][1-8]$/)
+      return current_player.move(player_input) if player_input.match?(MOVE_SYNTAX)
 
       invalid_input_message
       instructions_message
@@ -49,14 +49,14 @@ class Game
 
   # checks if an end game condition has been met
   def end_game
-    current_player.checkmate? || current_player.stalemate?
+    current_player.checkmate? || stalemate?
   end
 
   # checks if an end_cause has been done
   def end_cause
     if current_player.checkmate?
       checkmate_message(@player_que.last)
-    elsif current_player.stalemate?
+    elsif stalemate?
       stalemate_message
     end
   end
@@ -72,6 +72,11 @@ class Game
 
   # not implemented yet
   def undo_move; end
+
+  # a stalemate is reached when the current players pieces have no more available moves
+  def stalemate?
+    board.stalemate?(current_player.color)
+  end
 
   private
 
