@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 require_relative '../lib/cell'
+require_relative '../lib/symbols'
+require_relative '../lib/board_elements/*'
 
 # allows cell to cell interactions
 # parameters:
@@ -9,6 +11,8 @@ require_relative '../lib/cell'
 class Board
   attr_accessor :board_cartesian, :@board_db, :@pieces
 
+  include ChessSymbols
+
   # set up initial board state
   def initialize
     @board_db = create_board_db
@@ -16,6 +20,52 @@ class Board
     @pieces = create_pieces
 
     set_pieces
+  end
+
+  # @param in_cell [Cell]
+  # @param to_cell [Cell]
+  def move_piece(in_cell, to_cell)
+    piece = in_cell.piece.pop
+    place(piece, to_cell)
+
+    removal_remap(in_cell)
+  end
+
+  # places the piece in given cell
+  # @param in_cell [Cell]
+  def place(piece, in_cell)
+    capture_piece(in_cell) unless in_cell.piece.empty?
+    in_cell.piece << piece
+
+    placement_remap(in_cell)
+  end
+
+  # removes the piece in a cell
+  # @param in_cell [Cell]
+  def capture_piece(in_cell)
+    piece = in_cell.piece.pop
+
+    @pieces[piece.color][piece.key].pop
+  end
+
+  # remaps the connection of a cell given the context that
+  # ... that a piece has been removed in that cell
+  # @param cell [Cell]
+  def removal_remap(cell)
+    map_from_connections(cell)
+
+    cell.to_connections = []
+  end
+
+  # remaps the connections of a cell given the context
+  # ... that a piece has been placed
+  # @param cell [Cell]
+  def placement_remap(cell)
+    cell.from_connections.values.each do |from_connection|
+      map_path_of(from_connection, cell.key) if from_connection.piece.multiline
+    end
+
+    cell.to_connections = map_to_connections(cell)
   end
 
   # returns a color's piece
@@ -28,15 +78,12 @@ class Board
   # check if there are no more moves for all pieces of given color
   # @param color [String]
   def stalemate?(color)
-    pieces = pieces[color.to_sym].values.flatten
-    moves = pieces.map(&:valid_moves)
 
-    moves.all?(&:empty?)
   end
 
   # outputs the board in the cli
   def show
-    ordered_rows = @board_cartesian.reverse.map(&:contents.first.symbol)
+    ordered_rows = @board_cartesian.reverse.map(&:contents)
     formatted_rows = ordered_rows.map { |row| " #{row.join('|')} " }
 
     puts formatted_rows.join("\n")
@@ -44,25 +91,34 @@ class Board
 
   private
 
+  # creates a hash with actual cell objects
+  # @return board_db [Hash] with :cell_key and Cell object
   def create_board_db
     columns = ('a'..'h').to_a
     rows = ('1'..'8').to_a
-
     board_db = {}
 
+    squares = [BLACK_SQUARE, WHITE_SQUARE]
     rows.each do |row|
       columns.each do |column|
-        cell_name = column.concat(row)
-        board_db[cell_name] = Cell.new(cell_name)
+        cell_key = column.concat(row).to_sym
+        board_db[cell_key] = Cell.new(cell_key, square.first)
+        squares.rotate
       end
+      squares.rotate
     end
+
+    board_db
   end
 
   def create_board_cartesian
     cells = @board_db.values
 
     Array.new(8) do |row|
-      cells.slice!(0..7).each_with_index { |cell, column| cell.coordinate = [row, column] }
+      cells.slice!(0..7).each_with_index do |cell, column|
+        cell.coordinate = [row, column]
+        cell
+      end
     end
   end
 
