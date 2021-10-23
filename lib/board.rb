@@ -9,17 +9,17 @@ require_relative '../lib/board_elements/*'
 #   @board_db: hash with cell_keys as keys and cell as values
 #   @board_cartesian: array with [0][0] as cell a1 [7][7] as h8
 class Board
-  attr_accessor :board_cartesian, :@board_db, :@pieces
+  attr_accessor :board_cartesian, :board_db, :pieces
 
   include ChessSymbols
 
   # set up initial board state
-  def initialize
+  def initialize(empty: false)
     @board_db = create_board_db
     @board_cartesian = create_board_cartesian
     @pieces = create_pieces
 
-    set_pieces
+    set_pieces unless empty
   end
 
   # @param in_cell [Cell]
@@ -45,27 +45,87 @@ class Board
   def capture_piece(in_cell)
     piece = in_cell.piece.pop
 
+    # then delete piece in piece database
     @pieces[piece.color][piece.key].pop
   end
 
-  # remaps the connection of a cell given the context that
-  # ... that a piece has been removed in that cell
+  # remaps all connections in a context of piece removal
   # @param cell [Cell]
   def removal_remap(cell)
-    map_from_connections(cell)
+    # delete references in from_connections of other cells
+    disconnect(cell.to_connections)
 
+    # recalculate the paths of all cells in self.from_connections passing
+    # ... through cell
+    remap_paths_passing_through(cell)
+
+    # empty the two connections
     cell.to_connections = []
   end
-
+ 
   # remaps the connections of a cell given the context
   # ... that a piece has been placed
   # @param cell [Cell]
   def placement_remap(cell)
-    cell.from_connections.values.each do |from_connection|
-      map_path_of(from_connection, cell.key) if from_connection.piece.multiline
-    end
+    # remap all paths passing through cell
+    remap_paths_passing_through(cell)
 
-    cell.to_connections = map_to_connections(cell)
+    # point cells to other cells
+    map_to_connections(cell)
+  end
+ 
+  # recreates a path passing through a cell this could remove/add 
+  # ... references to a cell in @to_connections
+  # @param cell [Cell]
+  def remap_paths_passing_through(cell)
+    cell.from_connections.each_value do |connection|
+      map_path_passing_through(connection, cell) if connection.piece[0].multiline
+    end
+  end
+
+  def map_to_connections(cell)
+    # scope would be an array of coordinates grouped by direction
+    # ... i.e. [[[0,0], [0,1]], [[0,2], [1,3]]]
+    # ... where for each pair, first is row, last is column
+    scope = piece.scope(cell.coordinate)
+
+    # convert the directional array coordinates into
+    # ... directional array of connections, connections are hashes
+    # ... with cell_key: cell
+    cell.to_connections = scope.map do |direction|
+
+      # cells referred to by all the coordinates in direction
+      cells_in_direction = direction.map do |coordinate| 
+        board_cartesian[coordinate[0]][coordinate[1]]
+      end
+
+      # given all the cells in that direction
+      # get the list of cells up to the first non empty cell
+      cells_in_direction.find.with_object([]) do |cell_in_path, clear_path|
+        clear_path << cell_in_path
+        !cell_in_path.piece.empty?
+      end
+    end
+  end
+
+
+  # edits the connection in cell containing to_cell
+  # ... this is used in cases where cell.piece is a multicell
+  # ... linear piece; bishops queens and the like, when the piece
+  # ... in to_cell has been removed
+  # ... clearly in such cases, the connections containing to_cell
+  # ... will change.
+  def map_path_passing_through(cell1, cell2)
+    # find the hash containing to_cell.key then remap that connection
+    cell1.to_connections.find.with_index do |connection, index|
+      next unless connection.keys.include?(cell2.key)
+
+      # a list of cells passing to the given points
+      coord_path = path_from(cell1.coordinates, cell2.coordinates)
+
+      # then find all get all cells up to the first non_empty cell
+      cell1[index] = clear_path(coord_path)
+    end
   end
 
   # returns a color's piece
