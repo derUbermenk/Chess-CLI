@@ -62,7 +62,7 @@ class Board
     # empty the two connections
     cell.to_connections = []
   end
- 
+
   # remaps the connections of a cell given the context
   # ... that a piece has been placed
   # @param cell [Cell]
@@ -73,7 +73,7 @@ class Board
     # point cells to other cells
     map_to_connections(cell)
   end
- 
+
   # recreates a path passing through a cell this could remove/add 
   # ... references to a cell in @to_connections
   # @param cell [Cell]
@@ -84,32 +84,20 @@ class Board
   end
 
   def map_to_connections(cell)
-    # scope would be an array of coordinates grouped by direction
-    # ... i.e. [[[0,0], [0,1]], [[0,2], [1,3]]]
-    # ... where for each pair, first is row, last is column
-    scope = piece.scope(cell.coordinate)
-
-    # convert the directional array coordinates into
-    # ... directional array of connections, connections are hashes
-    # ... with cell_key: cell
-    cell.to_connections = scope.map do |direction|
-
-      # cells referred to by all the coordinates in direction
-      cells_in_direction = direction.map do |coordinate| 
-        board_cartesian[coordinate[0]][coordinate[1]]
+    # where a direction is a hash with cell_key: cell
+    # ... along a line of some direction
+    piece.scope(cell.coordinates).map do |direction|
+      # convert directional coordinates to cells
+      direction = direction.map do |coordinate|
+        x, y = coordinate[0], coordinate[1]
+        board_cartesian[x][y]
       end
 
-      # given all the cells in that direction
-      # get the list of cells up to the first non empty cell
-      cells_in_direction.find.with_object([]) do |cell_in_path, clear_path|
-        clear_path << cell_in_path
-        !cell_in_path.piece.empty?
-      end
+      get_path(direction)
     end
   end
 
-
-  # edits the connection in cell containing to_cell
+  # edits the connection in cell1 containing cell2 
   # ... this is used in cases where cell.piece is a multicell
   # ... linear piece; bishops queens and the like, when the piece
   # ... in to_cell has been removed
@@ -120,11 +108,24 @@ class Board
     cell1.to_connections.find.with_index do |connection, index|
       next unless connection.keys.include?(cell2.key)
 
-      # a list of cells passing to the given points
       coord_path = path_from(cell1.coordinates, cell2.coordinates)
 
-      # then find all get all cells up to the first non_empty cell
-      cell1[index] = clear_path(coord_path)
+      # then edit the direction where cell2 is located
+      cell1[index] = get_path(coord_path)
+    end
+  end
+
+  # returns a Hash containing the nearest cell to cell
+  # ... up to the first non-empty cell
+  # @param direction [Array] array of coordinates following a direction 
+  # @return [Hash] cell_key: Cell
+  def get_path(direction)
+    direction.find.with_object({}) do |cell, path|
+      path[cell.key] = cell
+
+      # stop iteration when cell contains a piece
+      # ... positioning allows us to still add that cell
+      !cell.piece.empty?
     end
   end
 
@@ -241,5 +242,29 @@ class Board
     cell_collections.zip(pieces).each do |cell, piece|
       cell.place(piece)
     end
+  end
+
+  # returns an array of points starting but excluding point1
+  # ... passing through point2 up to the bounds of the
+  # ... board, marked by the lines x = 7, y = 7 
+  # @param point1 [Array] containing x1, y2
+  # @param point2 [Array] containing x2, y2
+  def path_from(point1, point2)
+    x1, y1 = point1[0], point1[1]
+    x2, y2 = point2[0], point2[1]
+
+    slope = (y2 - y1) / (x2 - x1).to_f
+    y_intercept = y2 - (slope * x2)
+    y = ->(x) { (slope * x) + y_intercept }
+
+    x_values = [*0..7]
+
+    path = x_values.each_with_object([]) do |x, path|
+      y_val = y.call(x)
+      path << [x, y_val.to_i] if x_values.include?(y_val)
+    end
+
+    # do not include point 1
+    path[1..-1]
   end
 end
