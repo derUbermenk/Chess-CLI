@@ -72,6 +72,9 @@ class Board
 
     # point cells to other cells
     map_to_connections(cell)
+
+    # filter the valid connections for piece in cell
+    filter_connections(cell)
   end
 
   # recreates a path passing through a cell this could remove/add 
@@ -80,6 +83,9 @@ class Board
   def remap_paths_passing_through(cell)
     cell.from_connections.each_value do |connection|
       map_path_passing_through(connection, cell) if connection.piece[0].multiline
+
+      # then recalculate the possible moves for the piece in the connection 
+      filter_connections(connection)
     end
   end
 
@@ -97,7 +103,7 @@ class Board
     end
   end
 
-  # edits the connection in cell1 containing cell2 
+  # edits the connection in cell1 containing cell2
   # ... this is used in cases where cell.piece is a multicell
   # ... linear piece; bishops queens and the like, when the piece
   # ... in to_cell has been removed
@@ -129,6 +135,19 @@ class Board
     end
   end
 
+  # filters the possible moves for piece.moves
+  # @param of_cell [Cell] 
+  def filter_connections(of_cell)
+    in_cell_connections = of_cell.connections.map(&:values).flatten
+
+    # filter out cells that do not allow in_cells piece to move to
+    valid_connections = of_cell_connections.select do |cell|
+      valid_connection?(of_cell, cell)
+    end
+
+    of_cell.piece.moves = valid_connections.map(:&.keys)
+  end
+
   # returns a color's piece
   # @param color [Symbol] the color of the king to be returned
   # @return king [King]
@@ -137,9 +156,12 @@ class Board
   end
 
   # check if there are no more moves for all pieces of given color
-  # @param color [String]
+  # @param color [Symbol]
   def stalemate?(color)
+    pieces_remaining = @piece[color].values.flatten
 
+    # find returns nil if no moves remaining
+    pieces_remaining.find { |piece| !piece.moves.empty? }.nil?
   end
 
   # outputs the board in the cli
@@ -266,5 +288,21 @@ class Board
 
     # do not include point 1
     path[1..-1]
+  end
+
+  # returns checks if a connection between two cells
+  # ... are valid
+  # Validity allows the piece in cell 1 to be moved
+  # ... to cell 2
+  # @param
+  def valid_connection?(cell1, cell2)
+    moving_color = cell1.piece[0].color
+    current_king = king(moving_color)
+    check_removers = current_king.check_removers
+    validity = cell1.not_skewed && cell2.occupiable_by(moving_color)
+
+    return validity && check_removers.include?(cell2.key) if current_king.check?
+
+    validity
   end
 end
