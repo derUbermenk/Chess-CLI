@@ -52,8 +52,8 @@ class Board
   # remaps all connections in a context of piece removal
   # @param cell [Cell]
   def removal_remap(cell)
-    # delete references in from_connections of other cells
-    disconnect(cell.to_connections)
+    # delete references to cell in from_connections of other cells
+    disconnect(cell)
 
     # recalculate the paths of all cells in self.from_connections passing
     # ... through cell
@@ -75,6 +75,17 @@ class Board
 
     # filter the valid connections for piece in cell
     filter_connections(cell)
+  end
+
+  # removes references to cell in the from connections of 
+  # ... other cells
+  # @param cell [Cell]
+  def disconnect(cell)
+    connections = cell.to_connections.map(&:values).flatten
+
+    connections.each do |to_cell|
+      to_cell.from_connections.delete(cell.key)
+    end
   end
 
   # recreates a path passing through a cell this could remove/add 
@@ -136,9 +147,9 @@ class Board
   end
 
   # filters the possible moves for piece.moves
-  # @param of_cell [Cell] 
+  # @param of_cell [Cell]
   def filter_connections(of_cell)
-    in_cell_connections = of_cell.connections.map(&:values).flatten
+    of_cell_connections = of_cell.connections.map(&:values).flatten
 
     # filter out cells that do not allow in_cells piece to move to
     valid_connections = of_cell_connections.select do |cell|
