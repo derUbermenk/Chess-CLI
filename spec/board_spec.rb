@@ -68,7 +68,7 @@ describe Board do
     it 'remaps connections' do; end
 
     context 'capture' do
-      context 'when moving a rook from d4 to d7, with d7 occupied by opposite color'
+      context 'when moving a rook from d4 to d7, with d7 occupied by opposite color' do
         it "replaces the piece of the target cell
           with the piece of the source cell" do
           d7 = board.board_db[:d7]

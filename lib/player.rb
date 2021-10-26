@@ -33,7 +33,7 @@ class Player
 
   # checks input validity
   # ... returns null if input is invalid
-  # @param player_move [String] <piece_key>-<in_cell>-<to_cell>
+  # @param player_move [Hash] piece_key: in_cell: to_cell:
   def valid(player_move, board_db)
     in_cell = board_db[player_move[:in_cell].to_sym]
     to_cell = board_db[player_move[:to_cell].to_sym]
@@ -88,10 +88,10 @@ class Player
   # @param in_cell [Cell]
   # @param to_cell [Cell]
   def valid_cell?(in_cell, to_cell)
+    connected = in_cell.to_connections[to_cell.key]
     capturing_opposite_color = to_cell.piece.color != @color
-    connected = in_cell.to_connections.include?(to_cell.key)
 
-    return true if capturing_opposite_color && connected
+    return true if connected && capturing_opposite_color
   end
 
   # formats player move in to hash

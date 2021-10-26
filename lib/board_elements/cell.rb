@@ -10,6 +10,4 @@ class Cell
     @square = square
     @coordinate = nil
   end
-
-
 end
