@@ -1,7 +1,7 @@
 # frozen_string_literal: true
-require_relative '../lib/cells'
-require_relative '../lib/pieces/king'
-require_relative '../lib/chess_IO'
+require_relative 'board_elements/cell'
+require_relative 'board_elements/piece'
+require_relative 'io/io'
 
 class Player
   include ChessIO

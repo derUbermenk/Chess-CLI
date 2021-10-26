@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'chess_IO'
+require_relative 'io/io'
 require_relative 'board'
 require_relative 'player'
 # Contains all logic for playing a chess game, connects all

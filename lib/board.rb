@@ -1,7 +1,6 @@
 # frozen_string_literal: true
-require_relative '../lib/cell'
-require_relative '../lib/symbols'
-require_relative '../lib/board_elements/*'
+require_relative '../lib/io/symbols'
+require_relative '../lib/board_elements/cell'
 
 # allows cell to cell interactions
 # parameters:
@@ -156,7 +155,7 @@ class Board
       valid_connection?(of_cell, cell)
     end
 
-    of_cell.piece.moves = valid_connections.map(:&.keys)
+    of_cell.piece.moves = valid_connections.map(&:keys)
   end
 
   # returns a color's piece
@@ -196,7 +195,7 @@ class Board
     rows.each do |row|
       columns.each do |column|
         cell_key = column.concat(row).to_sym
-        board_db[cell_key] = Cell.new(cell_key, square.first)
+        board_db[cell_key] = Cell.new(cell_key, squares.first)
         squares.rotate
       end
       squares.rotate

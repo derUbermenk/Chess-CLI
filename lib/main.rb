@@ -2,7 +2,7 @@
 
 require 'yaml'
 require_relative 'game'
-require_relative 'chess_IO'
+require_relative 'io/io'
 
 class Main
   include ChessIO
