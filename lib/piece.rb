@@ -33,3 +33,6 @@ class King < Piece
     super
   end
 end
+
+class Knight < Piece
+end
