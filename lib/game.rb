@@ -3,6 +3,7 @@
 require_relative 'io/io'
 require_relative 'board'
 require_relative 'player'
+
 # Contains all logic for playing a chess game, connects all
 # ... serves as interface for all relevant chess objects to
 # ... interact with each other
