@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
-require_relative '../lib/board_elements'
-require_relative '../lib/symbols'
+require_relative '../io/symbols'
 
 # Parent Class of all chess pieces
 class Piece
   attr_accessor :moves
   attr_reader :color, :symbol, :multiline
 
-  include Symbol
+  include ChessSymbols
 
   # initializes a piece. Multiline pieces are those that
   # ... can occupy either of the cells that are along a specific
@@ -54,6 +53,25 @@ end
 class Knight < Piece
   def initialize(color, key: :n, multiline: false)
     super
+  end
+
+  def scope(coordinates)
+    x = coordinates.first
+    y = coordinates.last
+
+    quadrant1_x1 = x + 2
+    quadrant1_x2 = x + 1
+    quadrant2_x1 = x - 1
+    quadrant2_x2 = x - 2
+
+    # following quadrants with assumption of origin at
+    # ... coordinate
+    [
+      [quadrant1_x1, y + 1], [quadrant1_x2, y + 2],
+      [quadrant2_x2, y + 1], [quadrant2_x1, y + 2],
+      [quadrant2_x2, y - 1], [quadrant2_x1, y - 2],
+      [quadrant1_x2, y - 2], [quadrant2_x1, y - 1]
+    ]
   end
 end
 
