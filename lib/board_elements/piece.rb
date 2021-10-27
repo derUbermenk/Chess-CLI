@@ -15,7 +15,7 @@ class Piece
   # @param color [Symbol]
   # @param key [Symbol]
   # @param multiine [Boolean]
-  def initialize(color, key, multiline)
+  def initialize(color, key:, multiline:)
     @moves = []
 
     @key = key 
@@ -67,11 +67,15 @@ class Knight < Piece
     # following quadrants with assumption of origin at
     # ... coordinate
     [
-      [quadrant1_x1, y + 1], [quadrant1_x2, y + 2],
-      [quadrant2_x2, y + 1], [quadrant2_x1, y + 2],
-      [quadrant2_x2, y - 1], [quadrant2_x1, y - 2],
-      [quadrant1_x2, y - 2], [quadrant2_x1, y - 1]
-    ]
+      [[quadrant1_x1, y + 1]], [[quadrant1_x2, y + 2]],
+      [[quadrant2_x1, y + 2]], [[quadrant2_x2, y + 1]],
+      [[quadrant2_x2, y - 1]], [[quadrant2_x1, y - 2]],
+      [[quadrant1_x2, y - 2]], [[quadrant1_x1, y - 1]]
+    ].select do |direction| 
+      direction.all? do |coordinate|
+        coordinate.flatten.all? { |xy| xy >= 0 && xy <= 7 }
+      end
+    end
   end
 end
 
@@ -84,8 +88,12 @@ end
 
 #
 class Rook < Piece
-  def initialize(color, key: :r, multine: true)
+  def initialize(color, key: :r, multiline: true)
     super
+  end
+
+  def scope(coordinate)
+    
   end
 end
 
