@@ -18,8 +18,8 @@ describe Piece do
         coordinate = [3, 2]
         correct_scope =  [
           [[5, 3]], [[4, 4]], # Quadrant 1
-          [[1, 3]], [[2, 4]], # Quadrant 2
-          [[2, 0]], [[1, 1]], # Quadrant 3
+          [[2, 4]], [[1, 3]], # Quadrant 2
+          [[1, 1]], [[2, 0]], # Quadrant 3
           [[4, 0]], [[5, 1]]  # Quadrant 4
         ]
 
@@ -69,7 +69,7 @@ describe Piece do
           [*3..7].zip(Array.new(5, 4)),
           [*3..5].zip([*5..7]),
           Array.new(3, 2).zip([*5..7]),
-          ([1, 0].reverse).zip([5, 6]),
+          ([1, 0]).zip([5, 6]),
           [1, 0].zip([4, 4]),
           [1, 0].zip([3, 2]),
           Array.new(4, 2).zip([*0..3]).reverse,

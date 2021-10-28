@@ -33,6 +33,49 @@ class Piece
   def scope(coordinates) 
     # draw lines
   end
+
+  private
+  
+  # calculates horizontal and vertical lines from coordinate
+  def line_wise_directions(coordinate)
+    x = coordinate[0]
+    y = coordinate[1]
+
+    [[*(x + 1)..7].zip(Array.new(7 - x, y)),
+     Array.new(7 - y, x).zip([*(y+1)..7]),
+     [*0..(x - 1)].reverse.zip(Array.new(x, y)),
+     Array.new(y, x).zip([*0..(y - 1)].reverse)].reject(&:empty?)
+
+  end
+
+  # calculates all diagonal lines from coordinate 
+  def diagonal_wise_directions(coordinate)
+    x = coordinate[0]
+    [draw_diagonal(coordinate, 1, [*(x + 1)..7]),
+     draw_diagonal(coordinate, -1, [*0...x].reverse),
+     draw_diagonal(coordinate, 1, [*0...x].reverse),
+     draw_diagonal(coordinate, -1, [*(x + 1)..7])].reject(&:empty?)
+  end
+
+  # returns the array of coodinates passing through
+  # coordinate
+  # @param slope [Integer] the slope of the line for which the
+  # ... the coordinates will be acquired
+  # @param x_vals [Array] the Array of x_vals to calculate y 
+  def draw_diagonal(coordinate, slope, x_vals)
+    x_base = coordinate[0]
+    y_base = coordinate[1]
+
+    y_intercept = y_base - (slope * x_base)
+    y_fn = ->(x) { (slope * x) + y_intercept }
+
+    allowed_range = 0..7
+
+    path = x_vals.each_with_object([]) do |x, path|
+      y_val = y_fn.call(x)
+      path << [x, y_val] if allowed_range.include?(y_val)
+    end
+  end
 end
 
 # 
@@ -46,6 +89,13 @@ end
 class Queen < Piece
   def initialize(color, key: :q, multiline: true)
     super
+  end
+
+  def scope(coordinate)
+    linewise = line_wise_directions(coordinate)
+    diagonal_wise = diagonal_wise_directions(coordinate)
+
+    linewise.zip(diagonal_wise).flatten(1).compact
   end
 end
 
@@ -84,6 +134,10 @@ class Bishop < Piece
   def initialize(color, key: :b, multiline: true)
     super
   end
+
+  def scope(coordinate)
+    diagonal_wise_directions(coordinate)
+  end
 end
 
 #
@@ -93,7 +147,7 @@ class Rook < Piece
   end
 
   def scope(coordinate)
-    
+    line_wise_directions(coordinate)
   end
 end
 
@@ -101,5 +155,20 @@ end
 class Pawn < Piece
   def initialize(color, key: :p, multiline: false)
     super
+  end
+
+  def scope(coordinate)
+    x = coordinate[0]
+    y = coordinate[1]
+
+    [
+      [[x + 1, y + 1]],
+      [[x, y + 1], [x, y + 2]],
+      [[x -1, y + 1]]
+    ].select do |direction|
+      direction.all? do |coordinate|
+        coordinate.flatten.all? { |xy| xy >= 0 && xy <= 7 }
+      end
+    end
   end
 end
