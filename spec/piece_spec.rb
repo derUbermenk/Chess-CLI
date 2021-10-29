@@ -93,5 +93,42 @@ describe Piece do
         expect(calculated_scope).to eq(correct_scope)
       end
     end
+
+    context 'when the piece is a non_multilinear piece' do
+      context 'when a black pawn in (6,7)' do
+        let(:pawn) { Pawn.new(:black) }
+        it 'returns directions that are within the board' do 
+          coordinate = [6, 6]
+          correct_scope = [[[7, 5]], [[6, 5], [6, 4]], [[5, 5]]]
+          calculated_scope = pawn.scope(coordinate)
+
+          expect(calculated_scope).to eq(correct_scope)
+
+        end
+      end
+
+      context 'when a white pawn has been moved and is in (2, 5)' do
+        let(:pawn) { Pawn.new(:white) }
+        it "returns the directions but not including an
+        additional vertical move" do
+          coordinate = [2, 5]
+          correct_scope = [[[3, 6]], [[2, 6]], [[1, 6]]]
+          calculated_scope = pawn.scope(coordinate)
+
+          expect(calculated_scope).to eq(correct_scope)
+        end
+      end
+
+      context 'when a king is in (7,7)' do
+        let(:king) { King.new(:black) }
+        it 'returns directions that are within the board' do
+          coordinate = [7, 7]
+          correct_scope = [[[6, 7]], [[6, 6]], [[7, 6]]]
+          calculated_scope = king.scope(coordinate)
+
+          expect(calculated_scope).to eq(correct_scope)
+        end
+      end
+    end
   end
 end
