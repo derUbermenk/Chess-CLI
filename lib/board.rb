@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require_relative '../lib/io/symbols'
 require_relative '../lib/board_elements/cell'
+require_relative '../lib/board_elements/piece'
 
 # allows cell to cell interactions
 # parameters:
@@ -18,13 +19,13 @@ class Board
     @board_cartesian = create_board_cartesian
     @pieces = create_pieces
 
-    set_pieces unless empty
+    place_pieces unless empty
   end
 
   # @param in_cell [Cell]
   # @param to_cell [Cell]
   def move_piece(in_cell, to_cell)
-    piece = in_cell.piece.pop
+    piece = in_cell.remove_piece
     place(piece, to_cell)
 
     removal_remap(in_cell)
@@ -33,8 +34,8 @@ class Board
   # places the piece in given cell
   # @param in_cell [Cell]
   def place(piece, in_cell)
-    capture_piece(in_cell) unless in_cell.piece.empty?
-    in_cell.piece << piece
+    capture_piece(in_cell) unless in_cell.piece.nil?
+    in_cell.piece = piece
 
     placement_remap(in_cell)
   end
@@ -42,10 +43,10 @@ class Board
   # removes the piece in a cell
   # @param in_cell [Cell]
   def capture_piece(in_cell)
-    piece = in_cell.piece.pop
+    piece = in_cell.remove_piece
 
     # then delete piece in piece database
-    @pieces[piece.color][piece.key].pop
+    @pieces[piece.color].delete(piece.key)
   end
 
   # remaps all connections in a context of piece removal
@@ -92,7 +93,7 @@ class Board
   # @param cell [Cell]
   def remap_paths_passing_through(cell)
     cell.from_connections.each_value do |connection|
-      map_path_passing_through(connection, cell) if connection.piece[0].multiline
+      map_path_passing_through(connection, cell) if connection.piece.multiline
 
       # then recalculate the possible moves for the piece in the connection 
       filter_connections(connection)
@@ -100,13 +101,16 @@ class Board
   end
 
   def map_to_connections(cell)
+    piece = cell.piece
+    puts piece
+    puts cell.coordinate
     # where a direction is a hash with cell_key: cell
     # ... along a line of some direction
-    piece.scope(cell.coordinates).map do |direction|
+    piece.scope(cell.coordinate).map do |direction|
       # convert directional coordinates to cells
       direction = direction.map do |coordinate|
         x, y = coordinate[0], coordinate[1]
-        board_cartesian[x][y]
+        @board_cartesian[x][y]
       end
 
       get_path(direction)
@@ -141,14 +145,14 @@ class Board
 
       # stop iteration when cell contains a piece
       # ... positioning allows us to still add that cell
-      !cell.piece.empty?
+      !cell.piece.nil?
     end
   end
 
   # filters the possible moves for piece.moves
   # @param of_cell [Cell]
   def filter_connections(of_cell)
-    of_cell_connections = of_cell.connections.map(&:values).flatten
+    of_cell_connections = of_cell.to_connections.map(&:values).flatten
 
     # filter out cells that do not allow in_cells piece to move to
     valid_connections = of_cell_connections.select do |cell|
@@ -194,7 +198,7 @@ class Board
     squares = [BLACK_SQUARE, WHITE_SQUARE]
     rows.each do |row|
       columns.each do |column|
-        cell_key = column.concat(row).to_sym
+        cell_key = (column + row).to_sym
         board_db[cell_key] = Cell.new(cell_key, squares.first)
         squares.rotate
       end
@@ -209,7 +213,7 @@ class Board
 
     Array.new(8) do |row|
       cells.slice!(0..7).each_with_index do |cell, column|
-        cell.coordinate = [row, column]
+        cell.coordinate = [column, row]
         cell
       end
     end
@@ -219,60 +223,59 @@ class Board
     {
       white:
       {
-        k: [King.new],
-        q: [Queen.new],
-        n: Array.new(2, Knight.new),
-        b: Array.new(2, Bishop.new),
-        r: Array.new(2, Rook.new),
-        p: Array.new(8, Pawn.new)
+        k: [King.new(:white)],
+        q: [Queen.new(:white)],
+        n: Array.new(2, Knight.new(:white)),
+        b: Array.new(2, Bishop.new(:white)),
+        r: Array.new(2, Rook.new(:white)),
+        p: Array.new(8, Pawn.new(:white))
       },
       black:
       {
-        k: [King.new],
-        q: [Queen.new],
-        n: Array.new(2, Knight.new),
-        b: Array.new(2, Bishop.new),
-        r: Array.new(2, Rook.new),
-        p: Array.new(8, Pawn.new)
+        k: [King.new(:black)],
+        q: [Queen.new(:black)],
+        n: Array.new(2, Knight.new(:black)),
+        b: Array.new(2, Bishop.new(:black)),
+        r: Array.new(2, Rook.new(:black)),
+        p: Array.new(8, Pawn.new(:black))
       }
     }
   end
 
-  def set_pieces
-    set_white_piece
-    set_black_piece
+  def place_pieces 
+    place_black_pieces 
+    place_white_pieces
   end
 
-  # sets the black pieces in the board
-  def set_white_piece 
-    pieces = @pieces[:white]
+  def place_white_pieces 
+    white_pieces = @pieces[:white]
 
-    @board_db[:e1].place(pieces[:k])
-    @board_db[:d1].place(pieces[:q])
-    set_multiple_pieces([@board_db[:a1], @board_db[:h1]], pieces[:r])
-    set_multiple_pieces([@board_db[:b1], @board_db[:g1]], pieces[:n])
-    set_multiple_pieces([@board_db[:c1], @board_db[:f1]], pieces[:b])
-    set_multiple_pieces(@board_cartesian[1], pieces[:p])
+    place_multiple([@board_db[:e1]], white_pieces[:k])
+    place_multiple([@board_db[:d1]], white_pieces[:q])
+    place_multiple([@board_db[:a1], @board_db[:h1]], white_pieces[:r])
+    place_multiple([@board_db[:b1], @board_db[:g1]], white_pieces[:n])
+    place_multiple([@board_db[:c1], @board_db[:f1]], white_pieces[:b])
+    place_multiple(@board_cartesian[1], white_pieces[:p])
   end
 
-  # sets the white pieces in the board
-  def set_black_piece
-    pieces = @pieces[:black]
+  def place_black_pieces
+    black_pieces = @pieces[:black]
 
-    @board_db[:e8].place(pieces[:k])
-    @board_db[:d8].place(pieces[:q])
-    set_multiple_pieces([@board_db[:a8], @board_db[:h8]], pieces[:r])
-    set_multiple_pieces([@board_db[:b8], @board_db[:g8]], pieces[:n])
-    set_multiple_pieces([@board_db[:c8], @board_db[:f8]], pieces[:b])
-    set_multiple_pieces(@board_cartesian[6], pieces[:p])
+    place_multiple([@board_db[:e8]], black_pieces[:k])
+    place_multiple([@board_db[:d8]], black_pieces[:q])
+    place_multiple([@board_db[:a8], @board_db[:h8]], black_pieces[:r])
+    place_multiple([@board_db[:b8], @board_db[:g8]], black_pieces[:n])
+    place_multiple([@board_db[:c8], @board_db[:f8]], black_pieces[:b])
+    place_multiple(@board_cartesian[6], black_pieces[:p])
   end
 
-  # use this for setting more than one pieces
-  # @param cell_collection [Array] the cells where the pieces are to be placed
-  # @param pieces [Array] the pieces to place in the cell collections 
-  def set_multiple_pieces(cell_collections, pieces)
+  # place a collection of pieces of the same type and color in
+  # ... a specified array of cells
+  # @param cell_collections [Array]
+  # @param pieces [Array]
+  def place_multiple(cell_collections, pieces)
     cell_collections.zip(pieces).each do |cell, piece|
-      cell.place(piece)
+      place(piece, cell)
     end
   end
 
