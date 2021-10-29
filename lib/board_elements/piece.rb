@@ -30,7 +30,7 @@ class Piece
   # @param coordinates [Array] the coordinate of cell
   # ... that the piece is in
   # @return [Array]
-  def scope(coordinates) 
+  def scope(coordinates)
     # draw lines
   end
 
@@ -71,17 +71,38 @@ class Piece
 
     allowed_range = 0..7
 
-    path = x_vals.each_with_object([]) do |x, path|
+    x_vals.each_with_object([]) do |x, path|
       y_val = y_fn.call(x)
       path << [x, y_val] if allowed_range.include?(y_val)
     end
   end
+
+  # for non multiline pieces, selects only the 
+  # ... directions where a coordinate is not out 
+  # ... of bounds
+  # @param scope [Array]
+  def filter(scope)
+    scope.reject do |direction|
+      direction.flatten.all? { |xy| xy >= 0 && xy <= 7 }
+    end
+  end
 end
 
-# 
+
 class King < Piece
   def initialize(color, key: :k, multiline: false)
     super
+  end
+
+  def scope(coordinate)
+    x = coordinate[0]
+    y = coordinate[1]
+    [
+      [[x + 1, y]], [[x + 1, y + 1]],
+      [[x - 1, y + 1]], [[x - 1, y]],
+      [[x - 1, y - 1]], [[x, y - 1]],
+      [[x + 1, y - 1]]
+    ]
   end
 end
 
@@ -116,16 +137,14 @@ class Knight < Piece
 
     # following quadrants with assumption of origin at
     # ... coordinate
-    [
-      [[quadrant1_x1, y + 1]], [[quadrant1_x2, y + 2]],
-      [[quadrant2_x1, y + 2]], [[quadrant2_x2, y + 1]],
-      [[quadrant2_x2, y - 1]], [[quadrant2_x1, y - 2]],
-      [[quadrant1_x2, y - 2]], [[quadrant1_x1, y - 1]]
-    ].select do |direction| 
-      direction.all? do |coordinate|
-        coordinate.flatten.all? { |xy| xy >= 0 && xy <= 7 }
-      end
-    end
+    filter(
+      [
+        [[quadrant1_x1, y + 1]], [[quadrant1_x2, y + 2]],
+        [[quadrant2_x1, y + 2]], [[quadrant2_x2, y + 1]],
+        [[quadrant2_x2, y - 1]], [[quadrant2_x1, y - 2]],
+        [[quadrant1_x2, y - 2]], [[quadrant1_x1, y - 1]]
+      ]
+    ) 
   end
 end
 
@@ -161,14 +180,12 @@ class Pawn < Piece
     x = coordinate[0]
     y = coordinate[1]
 
-    [
-      [[x + 1, y + 1]],
-      [[x, y + 1], [x, y + 2]],
-      [[x -1, y + 1]]
-    ].select do |direction|
-      direction.all? do |coordinate|
-        coordinate.flatten.all? { |xy| xy >= 0 && xy <= 7 }
-      end
-    end
+    filter(
+      [
+        [[x + 1, y + 1]],
+        [[x, y + 1], [x, y + 2]],
+        [[x -1, y + 1]]
+      ]
+    )
   end
 end
