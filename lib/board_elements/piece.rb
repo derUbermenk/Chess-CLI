@@ -83,7 +83,7 @@ class Piece
   # @param scope [Array]
   def filter(scope)
     scope.reject do |direction|
-      direction.flatten.all? { |xy| xy >= 0 && xy <= 7 }
+      direction.flatten.any? { |xy| xy < 0 || xy > 7 }
     end
   end
 end
@@ -97,12 +97,14 @@ class King < Piece
   def scope(coordinate)
     x = coordinate[0]
     y = coordinate[1]
-    [
-      [[x + 1, y]], [[x + 1, y + 1]],
-      [[x - 1, y + 1]], [[x - 1, y]],
-      [[x - 1, y - 1]], [[x, y - 1]],
-      [[x + 1, y - 1]]
-    ]
+    filter(
+      [
+        [[x + 1, y]], [[x + 1, y + 1]],
+        [[x - 1, y + 1]], [[x - 1, y]],
+        [[x - 1, y - 1]], [[x, y - 1]],
+        [[x + 1, y - 1]]
+      ]
+    )
   end
 end
 
@@ -179,13 +181,29 @@ class Pawn < Piece
   def scope(coordinate)
     x = coordinate[0]
     y = coordinate[1]
+    y_direction = @color == :black ? -1 : 1
+
+    vertical_move = [[x, y + 1 * y_direction]]
+    vertical_move << [x, y + 2 * y_direction] if unmoved?(coordinate)
 
     filter(
-      [
-        [[x + 1, y + 1]],
-        [[x, y + 1], [x, y + 2]],
-        [[x -1, y + 1]]
-      ]
+      [[[x + 1, (y + 1 * y_direction)]], vertical_move,
+       [[x - 1, y + 1 * y_direction]]]
     )
+  end
+
+  private
+
+  # checks if a pawn is unmoved based on the coordinates
+  def unmoved?(coordinate)
+    black = @color == :black
+    white = @color == :white
+    row = coordinate[1]
+
+    if white
+      true if row == 1
+    elsif black
+      true if row == 6
+    end
   end
 end
