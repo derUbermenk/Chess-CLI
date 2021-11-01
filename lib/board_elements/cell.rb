@@ -23,4 +23,20 @@ class Cell
 
     piece
   end
+
+  # checks if this self is in a given
+  # ... collection of skewed positions
+  def not_skewed; end
+
+  def occupiable_by(color)
+    return true if @piece.nil?
+
+    return true if @piece.color != color
+  end
+
+  # the piece of the cell or the square 
+  # ... if no piece is available
+  def show
+    piece || square
+  end
 end

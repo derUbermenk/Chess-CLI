@@ -74,7 +74,7 @@ class Board
     map_to_connections(cell)
 
     # filter the valid connections for piece in cell
-    filter_connections(cell)
+    cell.piece.moves = filter_connections(cell)
   end
 
   # removes references to cell in the from connections of 
@@ -92,27 +92,25 @@ class Board
   # ... references to a cell in @to_connections
   # @param cell [Cell]
   def remap_paths_passing_through(cell)
-    cell.from_connections.each_value do |connection|
-      map_path_passing_through(connection, cell) if connection.piece.multiline
+    cell.from_connections.each_value do |from_cell| 
+      map_path_passing_through(from_cell, cell) if from_cell.piece.multiline
 
-      # then recalculate the possible moves for the piece in the connection 
-      filter_connections(connection)
+      # then recalculate the possible moves for the piece in the from_cell 
+      from_cell.piece.moves = filter_connections(from_cell)
     end
   end
 
   def map_to_connections(cell)
     piece = cell.piece
-    puts piece
-    puts cell.coordinate
     # where a direction is a hash with cell_key: cell
     # ... along a line of some direction
     piece.scope(cell.coordinate).map do |direction|
+
       # convert directional coordinates to cells
       direction = direction.map do |coordinate|
         x, y = coordinate[0], coordinate[1]
         @board_cartesian[x][y]
       end
-
       get_path(direction)
     end
   end
@@ -149,7 +147,7 @@ class Board
     end
   end
 
-  # filters the possible moves for piece.moves
+  # filters the possible moves given the piece in a cell 
   # @param of_cell [Cell]
   def filter_connections(of_cell)
     of_cell_connections = of_cell.to_connections.map(&:values).flatten
@@ -159,7 +157,8 @@ class Board
       valid_connection?(of_cell, cell)
     end
 
-    of_cell.piece.moves = valid_connections.map(&:keys)
+    # then returns the keys of the cells
+    valid_connections.map(&:key)
   end
 
   # returns a color's piece
@@ -307,11 +306,14 @@ class Board
   # ... are valid
   # Validity allows the piece in cell 1 to be moved
   # ... to cell 2
-  # @param
+  # @param cell1 the cell where the piece originates
+  # @param cell2 the cell where the piece is moving to
+  # return [TrueClass, FalseClass]
   def valid_connection?(cell1, cell2)
-    moving_color = cell1.piece[0].color
+    moving_color = cell1.piece.color
     current_king = king(moving_color)
     check_removers = current_king.check_removers
+    cell2_empty = cell2.piece.nil?
     validity = cell1.not_skewed && cell2.occupiable_by(moving_color)
 
     return validity && check_removers.include?(cell2.key) if current_king.check?
