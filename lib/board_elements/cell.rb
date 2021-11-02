@@ -24,6 +24,13 @@ class Cell
     piece
   end
 
+  def disconnect
+    to_connections = @to_connections.map(&:values).flatten
+    to_connections.each { |cell| delete_ref(cell) }
+
+    @to_connections = []
+  end
+
   # checks if this self is in a given
   # ... collection of skewed positions
   def not_skewed; end
@@ -39,4 +46,13 @@ class Cell
   def show
     piece || square
   end
+
+  private
+  # deletes the reference to self in the from connection of 
+  # a given cell
+  # @param cell [Cell]
+  def delete_ref(cell)
+    cell.from_connections.delete(@key)
+  end
+
 end
