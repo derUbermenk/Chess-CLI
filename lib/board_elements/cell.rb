@@ -24,6 +24,14 @@ class Cell
     piece
   end
 
+  # add all connections to to_connections
+  # and add refs to self to all connections
+  def connect(connections)
+    @to_connections = connections.each do |direction|
+      direction.each { |key, cell| add_ref(cell)}
+    end
+  end
+
   def disconnect
     to_connections = @to_connections.map(&:values).flatten
     to_connections.each { |cell| delete_ref(cell) }
@@ -48,6 +56,13 @@ class Cell
   end
 
   private
+
+  # adds a self reference to cell.from_connections
+  # @param cell [Cell]
+  def add_ref(cell)
+    cell.from_connections[@key] = self
+  end
+
   # deletes the reference to self in the from connection of 
   # a given cell
   # @param cell [Cell]
