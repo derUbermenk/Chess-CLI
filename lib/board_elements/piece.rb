@@ -4,8 +4,8 @@ require_relative '../io/symbols'
 
 # Parent Class of all chess pieces
 class Piece
-  attr_accessor :moves
-  attr_reader :color, :symbol, :multiline
+  attr_accessor :moves, :coordinate
+  attr_reader :color, :key, :multiline
 
   include ChessSymbols
 
@@ -16,6 +16,7 @@ class Piece
   # @param key [Symbol]
   # @param multiine [Boolean]
   def initialize(color, key:, multiline:)
+    @coordinate = []
     @moves = []
 
     @key = key 

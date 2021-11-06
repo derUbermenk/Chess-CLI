@@ -10,7 +10,7 @@ class Cell
     @key = key
     @square = square
     @piece = nil
-    @coordinate = nil
+    @coordinate = []
 
     @from_connections = {}
     @to_connections = []
@@ -37,6 +37,19 @@ class Cell
     to_connections.each { |cell| delete_ref(cell) }
 
     @to_connections = []
+  end
+
+  # update the path -- in to_connections containing the given cell
+  # @param cell [Cell] search for the path with the given cell
+  # @param new_path [Array] new array of path to replace said path
+  def update_path(cell_key, new_path)
+    @to_connections.map! do |path| 
+     if path[cell_key]
+      new_path
+     else
+      path
+     end
+    end
   end
 
   # checks if this self is in a given
