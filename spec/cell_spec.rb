@@ -43,7 +43,6 @@ describe Cell do
         expected_connections.each do |direction|
           direction.each { |key, cell| expect(cell.from_connections[:c4]).to eq(c4) }
         end
-
       end
     end
   end
@@ -63,5 +62,103 @@ describe Cell do
     end
   end
 
-  describe '#occupiable_by' do; end
+  describe '#update_path' do
+    let(:db) { Board.new(empty: true).board_db }
+    let(:d4) { db[:d4] }
+    context 'when a new path has been calculated for d4 for the path containing d3' do
+      before do
+        d4.to_connections = [
+          { d3: db[:d3], d2: db[:d2] },
+          { c4: db[:c4], b4: db[:b4] }
+        ]
+      end
+
+      it 'updates the path containing the given cell with the new path' do
+        new_path = { d3: db[:d3], d2: db[:d2], d1: db[:d1] }
+        new_connections = [new_path, { c4: db[:c4], b4: db[:b4] }]
+        expect { d4.update_path(:d3, new_path) }.to change { d4.to_connections }.to(new_connections)
+      end
+    end
+  end
+
+  describe '#not_checked_by' do
+    context "when self is checked has a from connection with a cell containing a black piece and 
+      no other connection" do
+      context 'when checking if it is not in check by a black piece' do
+        it 'returns false' do
+          a8 = Cell.new(:a8, :square)
+          a8.piece = Rook.new(:black)
+          a7 = Cell.new(:a7, :square)
+          a7.from_connections = { a8: a8 }
+
+          expect(a7.not_checked_by(:black)).to be false
+        end
+      end
+
+      context 'when checking if it is not in check by a white piece' do
+        it 'returns true' do
+          a8 = Cell.new(:a8, :square)
+          a8.piece = Rook.new(:black)
+          a7 = Cell.new(:a7, :square)
+          a7.from_connections = { a8: a8 }
+
+          expect(a7.not_checked_by(:white)).to be true 
+        end
+      end
+    end
+
+    context "when self is checked has a from connection with a cell containing a white piece and 
+      no other connection" do
+      context 'when checking if it is not in check by a black piece' do
+        it 'returns true' do
+          a8 = Cell.new(:a8, :square)
+          a8.piece = Rook.new(:white)
+          a7 = Cell.new(:a7, :square)
+          a7.from_connections = { a8: a8 }
+
+          expect(a7.not_checked_by(:black)).to be true 
+        end
+      end
+
+      context 'when checking if it is not in check by a white piece' do
+        it 'returns false' do
+          a8 = Cell.new(:a8, :square)
+          a8.piece = Rook.new(:white)
+          a7 = Cell.new(:a7, :square)
+          a7.from_connections = { a8: a8 }
+
+          expect(a7.not_checked_by(:white)).to be false 
+        end
+      end
+    end
+  end
+
+  describe '#occupiable_by' do 
+    context 'when a cell is empty' do
+      it 'is occupiable by both black and white colors' do
+        colors = %i[white black]
+        a7 = Cell.new(:a7, :square)
+
+        colors.each do |color|
+          expect(a7.occupiable_by(color)).to be true
+        end 
+      end
+    end
+
+    context 'when a cell has a black piece' do
+      it 'is occupiable by white pieces' do
+        a7 = Cell.new(:a7, :square)
+        a7.piece = Rook.new(:black)
+
+        expect(a7.occupiable_by(:white)).to be true
+      end
+
+      it 'is not occupiable by black pieces' do
+        a7 = Cell.new(:a7, :square)
+        a7.piece = Rook.new(:black)
+
+        expect(a7.occupiable_by(:black)).to be false
+      end
+    end
+  end
 end

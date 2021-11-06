@@ -52,14 +52,17 @@ class Cell
     end
   end
 
-  # checks if this self is in a given
-  # ... collection of skewed positions
-  def not_skewed; end
+  # check if self has no from connections
+  # containing a piece of the given color 
+  # @param color [Symbol]
+  def not_checked_by(color)
+    @from_connections.values.all? do |cell| 
+      cell.piece.color != color
+    end
+  end
 
   def occupiable_by(color)
-    return true if @piece.nil?
-
-    return true if @piece.color != color
+    @piece.nil? || @piece.color != color
   end
 
   # the piece of the cell or the square 
