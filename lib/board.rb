@@ -12,6 +12,7 @@ require_relative '../lib/board_tools/setup_tools'
 #   @board_cartesian: array with [0][0] as cell a1 [7][7] as h8
 class Board
   attr_accessor :board_cartesian, :board_db, :pieces
+  attr_reader :king_cells
 
   include ChessSymbols
   include MappingTools
@@ -22,6 +23,7 @@ class Board
     @board_db = create_board_db
     @board_cartesian = create_board_cartesian
     @pieces = create_pieces
+    @king_cells = {} # keeps track of the cell containing king
 
     place_pieces unless empty
   end
@@ -30,17 +32,24 @@ class Board
   # @param to_cell [Cell]
   def move_piece(in_cell, to_cell)
     piece = in_cell.remove_piece
-    place(piece, to_cell)
+    moving_color = piece.color
+    opposite_color_king_cell = @king_cells[opposite_color(moving_color)]
 
+    place(piece, to_cell)
     removal_remap(in_cell)
+
+    king(opposite_color).check = true if to_cell.connected?(opposite_color_king_cell)
   end
 
   # places the piece in given cell
   # @param in_cell [Cell]
+  # @param piece [Piece]
   def place(piece, in_cell)
+    @king_cells[piece.color] = in_cell if piece.instance_of?(King) 
+
     capture_piece(in_cell) unless in_cell.piece.nil?
     in_cell.piece = piece
-    in_cell.piece.coordinate = in_cell.coordinate 
+    in_cell.piece.coordinate = in_cell.coordinate
 
     placement_remap(in_cell)
   end
@@ -86,15 +95,13 @@ class Board
 
     # return a hash with <piece-in_cell>: moves
 
-    pieces = @pieces[:white]
+    remaining_pieces = @pieces[color]
 
-    pieces.each_with_object({}) do |(piece_key, pieces), piece_moves|
-      pieces.each do |piece|
-        cell = to_cell(piece.coordinate)
-        piece_key = "#{piece_key}-#{cell}".to_i
-        piece_move = filter_connections(cell)
-
-        piece_moves[piece_key] = piece_move
+    remaining_pieces.each_with_object({}) do |(piece_key, pieces_), piece_moves|
+      pieces_.each do |piece|
+        cell = equiv_cell(piece.coordinate)
+        piece_key = "#{piece_key}-#{cell.key}"
+        piece_moves[piece_key] = piece.instance_of?(King) ? filter_connections_king(cell) : filter_connections(cell)
       end
     end
   end
@@ -140,7 +147,18 @@ class Board
     elsif path2.values.last.piece == current_king
       check_opposite_end.call(path1)
     else
-      return false
+      false
     end
+  end
+
+  # checks
+  def connected(cell1, cell2)
+
+  end
+
+  # gets the opposite color of the given color
+  # @param color [Symbol]
+  def opposite_color(color)
+    color == :white ? :black : :white
   end
 end

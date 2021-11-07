@@ -50,9 +50,46 @@ module MappingTools
   def map_paths_from(cell)
     piece = cell.piece
     connections = piece.scope(cell.coordinate).map { |direction| get_path(direction) }
-    # change opposite color king check if position of the color is in connections
-    # do relevant remapping of valid connections
     cell.connect(connections)
+  end
+
+  # returns an array of keys of the to_connections where cell can move to
+  # @param cell [Cell]
+  # @return [Array]
+  def filter_connections(cell)
+    return [] if skewed?(cell)
+
+    current_color = cell.piece.color
+    current_king = king(current_color)
+
+    if current_king.check
+      valid_connections = cell.to_connections.each_with_object([]) do |direction, valid_connections_|
+        # check removers would be all the to_connections of the given cell in check removers
+        valid_connections_.concat(direction.keys.select { |key| current_king.check_removers.include?(key) })
+      end
+    else
+      valid_connections = cell.to_connections.each_with_object([]) do |direction, valid_connections_|
+        valid_connections_.concat(direction.values.select { |cell_| cell_.occupiable_by(current_color) })
+      end
+    end
+
+    valid_connections.map(&:key)
+  end
+
+  # connection filter for cells containing king
+  def filter_connections_king(cell)
+    current_color = cell.piece.color
+    opposite_color = current_color == :white ? :black : :white
+
+    valid_connections = cell.to_connections.each_with_object([]) do |direction, valid_connections_|
+      valid_connections_.concat(direction.values.select do |cell_|
+        # not checked current color, checks if any of the from connections has
+        # a piece that is opposite to current color
+        cell_.not_checked_by(opposite_color) && cell_.occupiable_by(current_color)
+      end)
+    end
+
+    valid_connections.map(&:key)
   end
 
   #### HELPER #####
@@ -61,11 +98,11 @@ module MappingTools
   # @param direction [Array] array of coordinates 
   def convert_to_cells(direction)
     direction.map do |coordinate|
-      to_cell(coordinate)
+      equiv_cell(coordinate)
     end
   end
 
-  def to_cell(coordinate)
+  def equiv_cell(coordinate)
     x = coordinate[0]
     y = coordinate[1]
     @board_cartesian[y][x]
@@ -97,6 +134,8 @@ module MappingTools
 
   # A y function
   class LinearEquation
+    attr_reader :slope
+
     def initialize(point1, point2)
       @point1 = point1
       @point2 = point2
@@ -107,6 +146,8 @@ module MappingTools
     end
 
     def ordered_pair(allowed_range)
+      return [] if @point1 == @point2
+
       return vertical_line if @slope.nil?
 
       return horizontal_line if @slope.zero?
@@ -144,6 +185,8 @@ module MappingTools
 
       return nil if x2 == x1
 
+      return 0 if y2 == y1
+
       (y2 - y1) / (x2 - x1).to_f
     end
 
@@ -169,6 +212,13 @@ module MappingTools
     def horizontal_line
       y_ref = @point1[1]
       @domain.zip(Array.new(@domain.size, y_ref))
+    end
+  end
+
+  def convert_to_keys(to_connections)
+    to_connections.each_with_object([]) do |direction, keys|
+      #direction.each_value { |cell| keys << cell.key }
+      keys.concat(direction.values.map(&:key))
     end
   end
 end
