@@ -38,6 +38,7 @@ module MappingTools
 
   # maps all the cells that have paths to cell. This cells are
   # ... referenced through cell.from_connections
+  # @param cell [Cell]
   def map_paths_to(cell)
     cell.from_connections.each_value do |connection|
       new_path = get_path(make_direction(connection.coordinate, cell.coordinate))

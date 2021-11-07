@@ -45,7 +45,7 @@ describe MappingTools do
 
       it 'makes the connection call update direction with piece' do
         new_path = { d4: db[:d4], d3: db[:d3] }
-        expect_any_instance_of(Cell).to receive(:update_path).with(db[:d4], new_path)
+        expect_any_instance_of(Cell).to receive(:update_path).with(:d4, new_path)
         board.map_paths_to(db[:d4])
       end
     end
@@ -141,13 +141,14 @@ describe MappingTools do
         board.place(black_king, db[:c4])
         board.place(white_rook1, db[:b5])
         board.place(white_rook2, db[:b3])
-        
+
         allow(board).to receive(:king).with(:black).and_return(black_king)
       end
 
       it 'returns the cell keys of all to connections except does that are checked' do
         expected_valid_connections = %i[d4]
-        calculated_valid_connections = board.filter_connections(db[:c4])
+        calculated_valid_connections = board.filter_connections_king(db[:c4])
+
         expect(calculated_valid_connections).to eq(expected_valid_connections)
       end
     end
