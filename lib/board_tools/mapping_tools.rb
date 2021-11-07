@@ -41,7 +41,7 @@ module MappingTools
   def map_paths_to(cell)
     cell.from_connections.each_value do |connection|
       new_path = get_path(make_direction(connection.coordinate, cell.coordinate))
-      connection.update_path(cell, new_path) if connection.piece.multiline
+      connection.update_path(cell.key, new_path) if connection.piece.multiline
     end
   end
 
