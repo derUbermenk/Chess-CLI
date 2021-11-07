@@ -4,6 +4,7 @@ require_relative '../lib/board'
 
 describe MappingTools do
   let(:board) { Board.new(empty: true) }
+  let(:db) { board.board_db }
 
   describe '#placement_remap' do
     # test the ff functions
@@ -29,7 +30,7 @@ describe MappingTools do
       board.removal_remap(cell)
     end
   end
-  
+
   describe '#map_paths_to' do
     let(:board) { Board.new(empty: true) }
     let(:db) { board.board_db }
@@ -99,7 +100,116 @@ describe MappingTools do
     end
   end
 
+  describe '#filter_connections' do
+    let(:board) { Board.new(empty: true) }
+    let(:db) { board.board_db }
+    it 'returns an array of cell keys where the given cell can move to' do; end
+
+    context 'given a white knight in c4' do
+      context 'when the king is not in check, and all to connections are occupiable' do
+        before do
+          king_coordinate = db[:e4].coordinate
+          current_king = double('King', coordinate: king_coordinate, check: false)
+          white_knight = Knight.new(:white)
+          black_pawn = Pawn.new(:black)
+
+          board.place(white_knight, db[:c4])
+          board.place(black_pawn, db[:b6])
+
+          allow(board).to receive(:king).with(:white).and_return(current_king)
+        end
+
+        it 'returns the cell keys that are occupiable by the color of the piece in self' do
+          expected_valid_connections = %i[e5 d6 b6 a5 a3 b2 d2 e3]
+          calculated_valid_connections = board.filter_connections(db[:c4])
+          expect(calculated_valid_connections).to eq(expected_valid_connections)
+        end
+      end
+    end
+  end
+
+  describe '#filter_connections_king' do
+    let(:board) { Board.new(empty: true) }
+    let(:db) { board.board_db }
+
+    context 'when some of the to connections have from connections from cells with pieces of opposite color' do
+      before do
+        black_king = King.new(:black)
+        white_rook1 = Rook.new(:white)
+        white_rook2 = Rook.new(:white)
+
+        board.place(black_king, db[:c4])
+        board.place(white_rook1, db[:b5])
+        board.place(white_rook2, db[:b3])
+        
+        allow(board).to receive(:king).with(:black).and_return(black_king)
+      end
+
+      it 'returns the cell keys of all to connections except does that are checked' do
+        expected_valid_connections = %i[d4]
+        calculated_valid_connections = board.filter_connections(db[:c4])
+        expect(calculated_valid_connections).to eq(expected_valid_connections)
+      end
+    end
+
+    context 'when two pieces remain and the other is skewed' do
+      let(:board) { Board.new(empty: true) }
+      let(:db) { board.board_db }
+      before do
+        <<-doc
+        board.pieces = {
+          white: {
+            k: [King.new(:white)],
+            p: [Pawn.new(:white)]
+          },
+          black: {
+            q: [Queen.new(:black)],
+            r: [Rook.new(:black), Rook.new(:black)]
+          }
+        }
+        doc
+
+        black_queen = Queen.new(:black)
+        black_rook1 = Rook.new(:black)
+        black_rook2 = Rook.new(:black)
+
+        white_king = King.new(:white)
+        white_pawn = Pawn.new(:white)
+
+        <<-doc
+        board.place(board.pieces[:black][:q][0], db[:c4])
+        board.place(board.pieces[:black][:r][0], db[:c3])
+        board.place(board.pieces[:black][:r][1], db[:c5])
+
+        board.place(board.pieces[:white][:k][0], db[:e4])
+        board.place(board.pieces[:white][:p][0], db[:d4])
+        doc
+
+        board.place(black_queen, db[:c4])
+        board.place(black_rook1, db[:c3])
+        board.place(black_rook2, db[:c5])
+
+        board.place(white_king, db[:e4])
+        board.place(white_pawn, db[:d4])
+      end
+
+      it 'returns available moves for the non skewed pieces' do
+        expected_valid_connections = [:f4]
+        calculated_valid_connections = board.filter_connections_king(db[:e4])
+        #expect(calculated_valid_connections).to eq(expected_valid_connections)
+      end
+    end
+  end
+
+  # helpers
+
   describe '#make_directions' do
+    context 'when given the points [7,6] [7,6]' do
+      it 'returns an empty direction' do
+        calculated_direction = board.make_direction([7, 6], [7, 6])
+        expect(calculated_direction).to eq([])
+      end
+    end
     context 'when given the points [2,3] [1,2]' do
       it "returns the collections of coordinates along the line from start_point through
         through_point" do
@@ -172,4 +282,17 @@ describe MappingTools do
     end
   end
 
+  describe '#get_path' do
+    context 'when given a direction' do 
+      before do
+        db[:a5].piece = Pawn.new(:white)
+      end
+      it 'returns the list of all cells up to the first non empty cell' do
+        direction = board.make_direction([0,1], [0, 7])
+        correct_path = board.convert_to_cells([[0, 2], [0, 3], [0, 4]]).map(&:key)
+        path = board.get_path(direction).keys
+        expect(path).to eq(correct_path)
+      end
+    end
+  end
 end

@@ -32,6 +32,12 @@ class Cell
     end
   end
 
+  # checks if the given cell is connected to self
+  # via a to_connection.
+  def connected?(cell)
+    !cell.from_connections[@key].nil?
+  end
+
   def disconnect
     to_connections = @to_connections.map(&:values).flatten
     to_connections.each { |cell| delete_ref(cell) }

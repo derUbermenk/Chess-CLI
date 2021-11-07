@@ -91,8 +91,11 @@ end
 
 
 class King < Piece
+  attr_accessor :check
+
   def initialize(color, key: :k, multiline: false)
     super
+    @check = false
   end
 
   def scope(coordinate)

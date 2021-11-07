@@ -27,10 +27,6 @@ class Player
     end
   end
 
-  def checkmate?
-    king.checkmate?
-  end
-
   # checks input validity
   # ... returns null if input is invalid
   # @param player_move [Hash] piece_key: in_cell: to_cell:

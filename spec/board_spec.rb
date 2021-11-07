@@ -17,13 +17,39 @@ describe Board do
     end
   end
 
+  describe '#place' do
+    let(:board) { Board.new(empty: true) }
+    let(:db) { board.board_db }
+
+    context 'when placing a piece in the path of a pre-existing multiline piece' do
+      before do
+        board.place(Rook.new(:black), db[:h1])
+      end
+      it 'cuts the path of the pre-existing multiline piece shorter' do
+        white_pawn = Pawn.new(:white)
+        expected_connections = [
+          {
+            h2: db[:h2],
+            h3: db[:h3],
+            h4: db[:h4],
+            h5: db[:h5],
+            h6: db[:h6],
+            h7: db[:h7],
+            h8: db[:h8]
+          },
+          {
+            g1: db[:g1],
+            f1: db[:f1]
+          }
+        ]
+        expect { board.place(white_pawn, db[:f1]) }.to change{ db[:h1].to_connections }.to(expected_connections)
+      end
+    end
+  end
+
   describe '#valid_moves' do
     it "a hash of containing keys -- piece-in_cell and values 
-      arrays of valid connections, given a piece color" do 
-      
-    end
-    
-
+      arrays of valid connections, given a piece color" do; end
     context 'when a piece is skewed it will not have any moves' do 
       let(:board) { Board.new(empty: true) }
       let(:db) { board.board_db }
