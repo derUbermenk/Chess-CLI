@@ -33,12 +33,12 @@ class Board
   def move_piece(in_cell, to_cell)
     piece = in_cell.remove_piece
     moving_color = piece.color
-    opposite_color_king_cell = @king_cells[opposite_color(moving_color)]
+    waiting_color = opposite_color(moving_color)
 
     place(piece, to_cell)
     removal_remap(in_cell)
 
-    king(opposite_color).check = true if to_cell.connected?(opposite_color_king_cell)
+    assess_check(waiting_color) unless @king_cells[waiting_color].not_checked_by(moving_color)
   end
 
   # places the piece in given cell
@@ -173,5 +173,30 @@ class Board
 
     # then we delete the piece in the database
     @pieces[color][piece_key].delete_at(piece_index)
+  end
+
+  def assess_check(color)
+    # * king refers to the king of the given color
+    king_cell = @king_cells[color]
+    checking_cells = king_cell.checking_cells(opposite_color(color)).keys
+    king = @king_cells[color].piece
+    king.check_count = checking_cells.size
+    king.check = true
+
+    if king.check_count > 1
+      # only way to remove checks when more than one check is to move the king
+      # to an unchecked position
+      king.check_removers = []
+    elsif king.check_count == 1
+      checking_cell = checking_cells[0]
+      checking_piece = checking_cell.piece
+
+      king.check_removers = if checking_piece.multiline
+                              get_path(make_direction(king_cell.coordinate,
+                                                      checking_cell.coordinate)).keys
+                            else
+                              king.check_removers = [checking_cell.key]
+                            end
+    end
   end
 end

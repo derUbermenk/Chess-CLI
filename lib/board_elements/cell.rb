@@ -60,6 +60,11 @@ class Cell
     end
   end
 
+  # returns a hash of the from connections containing a piece of the given color 
+  def checking_cells(color)
+    @from_connections.select { |key, cell| cell.piece.color == color }
+  end
+
   # check if self has no from connections
   # containing a piece of the given color 
   # @param color [Symbol]

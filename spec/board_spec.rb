@@ -3,6 +3,8 @@
 require_relative '../lib/board'
 
 describe Board do
+  subject(:board) { described_class.new(empty: true) }
+  let(:db) { board.board_db }
   describe '#initialize' do
     it 'calls place pieces when the board is initialized' do
       expect_any_instance_of(Board).to receive(:place_pieces)
@@ -13,6 +15,31 @@ describe Board do
       it 'does not call create pieces' do
         expect_any_instance_of(Board).not_to receive(:place_pieces)
         Board.new(empty: true)
+      end
+    end
+  end
+
+  describe '#move_piece' do
+    context "when placing a piece in a cell that causes a check to the king
+      of opposite color" do
+      before do
+        white_king = King.new(:white)
+        black_knigt = Knight.new(:black)
+        board.pieces = {
+          white: {
+            k: [white_king]
+          },
+          black: {
+            n: [black_knigt]
+          }
+        }
+
+        board.place(white_king, db[:b6])
+        board.place(black_knigt, db[:c5])
+      end
+
+      it 'changes the state of the opposites colors king to check = true' do
+        expect { board.move_piece(db[:c5] , db[:a4]) }.to change { db[:b6].piece.check }.to(true)
       end
     end
   end
