@@ -100,8 +100,8 @@ class Board
     remaining_pieces.each_with_object({}) do |(piece_key, pieces_), piece_moves|
       pieces_.each do |piece|
         cell = equiv_cell(piece.coordinate)
-        piece_key = "#{piece_key}-#{cell.key}"
-        piece_moves[piece_key] = piece.instance_of?(King) ? filter_connections_king(cell) : filter_connections(cell)
+        piece_id = "#{piece_key}-#{cell.key}"
+        piece_moves[piece_id] = piece.instance_of?(King) ? filter_connections_king(cell) : filter_connections(cell)
       end
     end
   end

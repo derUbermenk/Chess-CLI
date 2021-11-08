@@ -28,7 +28,7 @@ class Cell
   # and add refs to self to all connections
   def connect(connections)
     @to_connections = connections.each do |direction|
-      direction.each { |key, cell| add_ref(cell)}
+      direction.each { |key, cell| cell.add_ref(self)}
     end
   end
 
@@ -40,21 +40,23 @@ class Cell
 
   def disconnect
     to_connections = @to_connections.map(&:values).flatten
-    to_connections.each { |cell| delete_ref(cell) }
+    to_connections.each { |cell| cell.delete_ref(self) }
 
     @to_connections = []
   end
 
   # update the path -- in to_connections containing the given cell
-  # @param cell [Cell] search for the path with the given cell
+  # @param cell_key [Symbol] search for the path with the given cell key
   # @param new_path [Array] new array of path to replace said path
   def update_path(cell_key, new_path)
     @to_connections.map! do |path| 
-     if path[cell_key]
-      new_path
-     else
-      path
-     end
+      if path[cell_key]
+        old_path = path
+
+        old_path.size > new_path.size ? cut_path(old_path, new_path) : extend_path(old_path, new_path)
+      else
+        path
+      end
     end
   end
 
@@ -77,19 +79,41 @@ class Cell
     piece || square
   end
 
-  private
 
-  # adds a self reference to cell.from_connections
+  # adds a reference to the given cell in the from connections of self
   # @param cell [Cell]
   def add_ref(cell)
-    cell.from_connections[@key] = self
+    @from_connections[cell.key] = cell 
   end
 
-  # deletes the reference to self in the from connection of 
-  # a given cell
+  # deletes the reference to the given cell in the from connection
+  # of self
   # @param cell [Cell]
   def delete_ref(cell)
-    cell.from_connections.delete(@key)
+    @from_connections.delete(cell.key)
   end
 
+  private
+
+  # deletes the ref to self in all from connections in old path that are not 
+  # ... in new path
+  # @param old_path [Hash]
+  # @param new_path [Hash]
+  def cut_path(old_path, new_path)
+    excluded_cells = (old_path.keys - new_path.keys).map { |key| old_path[key] }
+    excluded_cells.map { |cell| cell.delete_ref(self) }
+
+    new_path
+  end
+
+  # adds a ref to self in all the from connections in the new path that were
+  # ... initially not in the old path
+  # @param old_path [Hash]
+  # @param new_path [Hash]
+  def extend_path(old_path, new_path)
+    new_cells = (new_path.keys - old_path.keys).map { |key| new_path[key] }
+    new_cells.map { |cell| cell.add_ref(self) }
+
+    new_path
+  end
 end

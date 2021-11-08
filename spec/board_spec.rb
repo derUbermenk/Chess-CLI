@@ -21,7 +21,8 @@ describe Board do
     let(:board) { Board.new(empty: true) }
     let(:db) { board.board_db }
 
-    context 'when placing a piece in the path of a pre-existing multiline piece' do
+    context "when placing a piece to the right in the path of a 
+      pre-existing multiline piece" do
       before do
         board.place(Rook.new(:black), db[:h1])
       end
@@ -42,7 +43,42 @@ describe Board do
             f1: db[:f1]
           }
         ]
-        expect { board.place(white_pawn, db[:f1]) }.to change{ db[:h1].to_connections }.to(expected_connections)
+        expect { board.place(white_pawn, db[:f1]) }.to change { db[:h1].to_connections }.to(expected_connections)
+      end
+    end
+
+    context "when placing a piece to the left of the path of a 
+      pre-existing multiline piece" do
+      before do
+        board.place(Queen.new(:black), db[:c4])
+        board.place(Pawn.new(:white), db[:d4])
+      end
+      it 'cuts the path of the pre-existing multiline piece shorter' do
+        white_pawn = Pawn.new(:white)
+        expected_connections = [
+          { d4: db[:d4] },
+          {
+            d5: db[:d5], e6: db[:e6], 
+            f7: db[:f7], g8: db[:g8]
+          },
+          {
+            c5: db[:c5], c6: db[:c6],
+            c7: db[:c7], c8: db[:c8]
+          },
+          { b5: db[:b5], a6: db[:a6] },
+          { b4: db[:b4], a4: db[:a4] },
+          { b3: db[:b3], a2: db[:a2] },
+          { 
+            c3: db[:c3], c2: db[:c2],
+            c1: db[:c1]
+          },
+          {
+            d3: db[:d3], e2: db[:e2],
+            f1: db[:f1]
+          }
+        ]
+        expect(db[:c4].to_connections).to eq(expected_connections)
+        #expect { board.place(white_pawn, db[:d4]) }.to change { db[:c4].to_connections }.to(expected_connections)
       end
     end
   end
@@ -56,15 +92,17 @@ describe Board do
       before do
         board.pieces = {
           white: {
-            k: [King.new(:white)],
-            p: [Pawn.new(:white)]
+            p: [Pawn.new(:white)],
+            k: [King.new(:white)]
           },
           black: {
+            k: [King.new(:black)],
             q: [Queen.new(:black)],
             r: [Rook.new(:black), Rook.new(:black)]
           }
         }
 
+        board.place(board.pieces[:black][:k][0], db[:a4])
         board.place(board.pieces[:black][:q][0], db[:c4])
         board.place(board.pieces[:black][:r][0], db[:c3])
         board.place(board.pieces[:black][:r][1], db[:c5])
@@ -74,7 +112,7 @@ describe Board do
       end
 
       it 'returns empty moves for the skewed pieces' do
-        expected_moves = { 'k-e4' => [:f4] , 'p-d4' => []}
+        expected_moves = { 'k-e4' => [:f4], 'p-d4' => [] }
         expect(board.valid_moves(:white)).to eq(expected_moves)
       end
     end
