@@ -105,6 +105,69 @@ describe MappingTools do
     let(:db) { board.board_db }
     it 'returns an array of cell keys where the given cell can move to' do; end
 
+    context 'when the the king is in check' do
+      context 'when the king is in check by two pieces' do
+        before do
+          white_king = King.new(:white)
+          white_bishop = Bishop.new(:white)
+          black_knight = Knight.new(:black)
+          black_bishop = Bishop.new(:black)
+
+          board.pieces = {
+            white: {
+              k: [white_king],
+              b: [white_bishop]
+            },
+            black: {
+              n: [black_knight],
+              b: [black_bishop]
+            }
+          }
+
+          board.place(white_king, db[:c4])
+          board.place(white_bishop, db[:c6])
+          board.place(black_knight, db[:d5])
+          board.place(black_bishop, db[:g8])
+
+          board.move_piece(db[:d5], db[:e3])
+        end
+
+        it 'returns an empty array' do
+          filtered_connections = board.filter_connections(db[:c6])
+          expect(filtered_connections).to eq([])
+        end
+      end
+
+      context 'when the king is in check by only one piece' do
+        before do
+          white_king = King.new(:white)
+          white_bishop = Bishop.new(:white)
+          black_bishop = Bishop.new(:black)
+
+          board.pieces = {
+            white: {
+              k: [white_king],
+              b: [white_bishop]
+            },
+            black: {
+              b: [black_bishop]
+            }
+          }
+
+          board.place(white_king, db[:c4])
+          board.place(white_bishop, db[:c6])
+          board.place(black_bishop, db[:h7])
+
+          board.move_piece(db[:h7], db[:g8])
+        end
+
+        it 'returns the array containing the keys that can remove the keys' do
+          filtered_connections = board.filter_connections(db[:c6])
+          expect(filtered_connections).to eq([:d5])
+        end
+      end
+    end
+
     context 'given a white knight in c4' do
       context 'when the king is not in check, and all to connections are occupiable' do
         before do
@@ -157,7 +220,6 @@ describe MappingTools do
       let(:board) { Board.new(empty: true) }
       let(:db) { board.board_db }
       before do
-        <<-doc
         board.pieces = {
           white: {
             k: [King.new(:white)],
@@ -168,36 +230,19 @@ describe MappingTools do
             r: [Rook.new(:black), Rook.new(:black)]
           }
         }
-        doc
 
-        black_queen = Queen.new(:black)
-        black_rook1 = Rook.new(:black)
-        black_rook2 = Rook.new(:black)
-
-        white_king = King.new(:white)
-        white_pawn = Pawn.new(:white)
-
-        <<-doc
         board.place(board.pieces[:black][:q][0], db[:c4])
         board.place(board.pieces[:black][:r][0], db[:c3])
         board.place(board.pieces[:black][:r][1], db[:c5])
 
         board.place(board.pieces[:white][:k][0], db[:e4])
         board.place(board.pieces[:white][:p][0], db[:d4])
-        doc
-
-        board.place(black_queen, db[:c4])
-        board.place(black_rook1, db[:c3])
-        board.place(black_rook2, db[:c5])
-
-        board.place(white_king, db[:e4])
-        board.place(white_pawn, db[:d4])
       end
 
       it 'returns available moves for the non skewed pieces' do
         expected_valid_connections = [:f4]
         calculated_valid_connections = board.filter_connections_king(db[:e4])
-        #expect(calculated_valid_connections).to eq(expected_valid_connections)
+        expect(calculated_valid_connections).to eq(expected_valid_connections)
       end
     end
   end

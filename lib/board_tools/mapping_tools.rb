@@ -68,17 +68,18 @@ module MappingTools
     current_king = king(current_color)
 
     if current_king.check
+      return valid_connections = [] if current_king.check_count == 2
+
       valid_connections = cell.to_connections.each_with_object([]) do |direction, valid_connections_|
         # check removers would be all the to_connections of the given cell in check removers
         valid_connections_.concat(direction.keys.select { |key| current_king.check_removers.include?(key) })
       end
     else
       valid_connections = cell.to_connections.each_with_object([]) do |direction, valid_connections_|
-        valid_connections_.concat(direction.values.select { |cell_| cell_.occupiable_by(current_color) })
+        valid_connections_.concat(direction.select { |key, cell_| cell_.occupiable_by(current_color) }.keys)
       end
     end
 
-    valid_connections.map(&:key)
   end
 
   # connection filter for cells containing king
