@@ -59,7 +59,7 @@ class Board
   def capture_piece(in_cell)
     piece = in_cell.remove_piece
 
-    board.remove(piece)
+    remove(piece)
   end
 
   # returns a color's piece
@@ -151,14 +151,27 @@ class Board
     end
   end
 
-  # checks
-  def connected(cell1, cell2)
-
-  end
-
   # gets the opposite color of the given color
   # @param color [Symbol]
   def opposite_color(color)
     color == :white ? :black : :white
+  end
+
+  # removes a piece in board db
+  # @param piece [Piece]
+  def remove(piece)
+    color = piece.color
+    piece_key = piece.key
+    coordinate = piece.coordinate
+
+    # pieces are identified from other pieces by their coordinate
+    # and we delete the piece in the piece database via its index
+    # to find its index in the piece data we search for the index of the piece
+    # in the database with the coordinate == to that of the given piece, which 
+    # is in fact the piece itself
+    piece_index = @pieces[color][piece_key].index { |piece_| piece_.coordinate == coordinate}
+
+    # then we delete the piece in the database
+    @pieces[color][piece_key].delete_at(piece_index)
   end
 end

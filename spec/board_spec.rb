@@ -51,7 +51,6 @@ describe Board do
       pre-existing multiline piece" do
       before do
         board.place(Queen.new(:black), db[:c4])
-        board.place(Pawn.new(:white), db[:d4])
       end
       it 'cuts the path of the pre-existing multiline piece shorter' do
         white_pawn = Pawn.new(:white)
@@ -77,8 +76,7 @@ describe Board do
             f1: db[:f1]
           }
         ]
-        expect(db[:c4].to_connections).to eq(expected_connections)
-        #expect { board.place(white_pawn, db[:d4]) }.to change { db[:c4].to_connections }.to(expected_connections)
+        expect { board.place(white_pawn, db[:d4]) }.to change { db[:c4].to_connections }.to(expected_connections)
       end
     end
   end
@@ -212,6 +210,35 @@ describe Board do
 
       it 'returns true' do
         expect(board.skewed?(db[:a5])).to be true
+      end
+    end
+  end
+
+  describe '#remove' do
+    let(:board) { Board.new(empty: true) }
+    let(:db) { board.board_db }
+    let(:pawn_a3) { Pawn.new(:white) }
+    let(:pawn_a4) { Pawn.new(:white) }
+    let(:pawn_a5) { Pawn.new(:white) }
+    context 'when removing the pawn in cell a4' do
+      before do
+        board.pieces = {
+          white: {
+            p: [pawn_a3, pawn_a4, pawn_a5]
+          }
+        }
+
+        board.place(pawn_a3, db[:a3])
+        board.place(pawn_a4, db[:a4])
+        board.place(pawn_a5, db[:a5])
+      end
+      it 'removes that pawn in the database' do
+        updated_board_pieces = {
+          white: {
+            p: [pawn_a3, pawn_a5]
+          }
+        }
+        expect{ board.remove(pawn_a4) }.to change { board.pieces }.to(updated_board_pieces)
       end
     end
   end
