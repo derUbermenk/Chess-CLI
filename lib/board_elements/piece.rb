@@ -91,11 +91,12 @@ end
 
 
 class King < Piece
-  attr_accessor :check
+  attr_accessor :check, :check_count
 
   def initialize(color, key: :k, multiline: false)
     super
     @check = false
+    @check_count = 0
   end
 
   def scope(coordinate)
