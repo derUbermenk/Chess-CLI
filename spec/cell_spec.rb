@@ -81,6 +81,25 @@ describe Cell do
     end
   end
 
+  describe '#checking_cells' do
+    let(:a4) { Cell.new(:a4, :sq) }
+    let(:b4) { Cell.new(:b4, :sq) }
+    let(:a5) { Cell.new(:a5, :sq) }
+    let(:c5) { Cell.new(:c5, :sq) }
+
+    before do
+      b4.piece = Rook.new(:white)
+      a5.piece = Pawn.new(:white)
+      c5.piece = King.new(:black)
+
+      a4.from_connections = { b4: b4, a5: a5, c5: c5 }
+    end
+
+    it 'returns all the from_connections containing the given a piece of the given color' do
+      expect(a4.checking_cells(:white)).to eq({ b4: b4, a5: a5 })
+    end
+  end
+
   describe '#not_checked_by' do
     context "when self is checked has a from connection with a cell containing a black piece and 
       no other connection" do
