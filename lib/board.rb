@@ -178,7 +178,7 @@ class Board
   def assess_check(color)
     # * king refers to the king of the given color
     king_cell = @king_cells[color]
-    checking_cells = king_cell.checking_cells(opposite_color(color)).keys
+    checking_cells = king_cell.checking_cells(opposite_color(color))
     king = @king_cells[color].piece
     king.check_count = checking_cells.size
     king.check = true
@@ -188,7 +188,7 @@ class Board
       # to an unchecked position
       king.check_removers = []
     elsif king.check_count == 1
-      checking_cell = checking_cells[0]
+      checking_cell = checking_cells.values[0]
       checking_piece = checking_cell.piece
 
       king.check_removers = if checking_piece.multiline

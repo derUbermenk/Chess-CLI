@@ -39,7 +39,7 @@ describe Board do
       end
 
       it 'changes the state of the opposites colors king to check = true' do
-        expect { board.move_piece(db[:c5] , db[:a4]) }.to change { db[:b6].piece.check }.to(true)
+        expect { board.move_piece(db[:c5], db[:a4]) }.to change { db[:b6].piece.check }.to(true)
       end
     end
   end
@@ -267,6 +267,59 @@ describe Board do
         }
         expect{ board.remove(pawn_a4) }.to change { board.pieces }.to(updated_board_pieces)
       end
+    end
+  end
+
+  describe '#assess_check' do
+    let(:white_king) { King.new(:white) }
+    context 'when two pieces are checking the king' do
+      before do
+        board.place(white_king, db[:c4])
+        board.place(Knight.new(:black), db[:e3])
+        board.place(Bishop.new(:black), db[:g8])
+      end
+      it 'changes king.check count to 2' do
+        expect { board.assess_check(:white) }.to change{ white_king.check_count }.to(2)
+      end
+
+      it 'sets changes the king.check_removers to []' do
+        expect { board.assess_check(:white) }.to change { white_king.check_removers }.to([])
+      end
+    end
+
+    context 'when one piece is checking the king' do
+      context 'when that piece is a non multiline' do
+        before do
+          board.place(white_king, db[:c4])
+          board.place(Knight.new(:black), db[:e3])
+        end
+
+        it 'returns an array containing the key of the checking piece' do
+          expect { board.assess_check(:white) }.to change { white_king.check_removers }.to([:e3])
+        end
+
+        it 'sets changes the king.check_count to 1' do
+          expect { board.assess_check(:white) }.to change{ white_king.check_count }.to(1)
+        end
+      end
+
+      context 'when that piece is a multiline' do
+        before do
+          board.place(white_king, db[:c4])
+          board.place(Bishop.new(:black), db[:g8])
+        end
+
+        it 'returns an array containing the key of the checking piece' do
+          path_to_bishop = %i[d5 e6 f7 g8]
+          expect { board.assess_check(:white) }.to change { white_king.check_removers }.to(path_to_bishop)
+        end
+
+        it 'sets changes the king.check_count to 1' do
+          expect { board.assess_check(:white) }.to change{ white_king.check_count }.to(1)
+        end
+      end
+
+
     end
   end
 end
