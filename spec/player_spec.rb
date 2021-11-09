@@ -15,7 +15,7 @@ describe Player do
         allow(board).to receive(:valid_moves).with(:white).and_return(allowed_moves)
       end
       it 'returns false' do
-        move = {piece: 'n-d4', to_cell: :a5}
+        move = {piece: :n, in_cell: :d4, to_cell: :a5}
         validity = player1.valid(move)
         expect(validity).to be false
       end
@@ -28,7 +28,7 @@ describe Player do
       end
 
       it 'returns false' do
-        move = { piece: 'n-d3', to_cell: :a5 }
+        move = { piece: :n, in_cell: :d3, to_cell: :a5 }
         validity = player1.valid(move)
         expect(validity).to be false
       end
@@ -41,10 +41,89 @@ describe Player do
       end
 
       it 'returns true' do
-        move = { piece: 'n-d3', to_cell: :a5 }
+        move = { piece: :n, in_cell: :d3, to_cell: :a5 }
         validity = player1.valid(move)
         expect(validity).to be true
       end
     end
   end
+
+  describe '#checkmate?' do
+    let(:player1) { Player.new(:white, King.new(:white), Board.new(empty: true)) }
+    context 'when there are no more moves remaining' do
+      context 'and the king is in check' do
+        before do
+          valid_moves = {'k-d3': [], 'n-d1': [], 'p-h6': []}
+          allow_any_instance_of(Board).to receive(:valid_moves).with(:white).and_return(valid_moves)
+          allow_any_instance_of(King).to receive(:check).and_return(true)
+        end
+        it 'returns true' do
+          expect(player1.checkmate?).to be true
+        end
+      end
+
+      context 'and the king is not in check' do
+        before do
+          valid_moves = {'k-d3': [], 'n-d1': [], 'p-h6': []}
+          allow_any_instance_of(Board).to receive(:valid_moves).with(:white).and_return(valid_moves)
+          allow_any_instance_of(King).to receive(:check).and_return(false)
+        end
+        it 'returns false' do
+          expect(player1.checkmate?).to be false
+        end
+      end
+    end
+
+    context 'when there are still moves remaining' do
+      before do
+        valid_moves = {'k-d3': %i[d5 d7], 'n-d1': [], 'p-h6': []}
+        allow_any_instance_of(Board).to receive(:valid_moves).with(:white).and_return(valid_moves)
+        allow_any_instance_of(King).to receive(:check).and_return(false)
+      end
+
+      it 'returns false' do
+        expect(player1.checkmate?).to be false
+      end
+    end
+  end
+
+  describe '#stalemate?' do
+    let(:player1) { Player.new(:white, King.new(:white), Board.new(empty: true)) }
+    context 'when ther are no more moves remaining' do
+      context 'and the king is in check' do
+        before do
+          valid_moves = {'k-d3': [], 'n-d1': [], 'p-h6': []}
+          allow_any_instance_of(Board).to receive(:valid_moves).with(:white).and_return(valid_moves)
+          allow_any_instance_of(King).to receive(:check).and_return(true)
+        end
+        it 'returns true' do
+          expect(player1.stalemate?).to be false 
+        end
+    end
+
+      context 'and the king is not in check' do
+        before do
+          valid_moves = {'k-d3': [], 'n-d1': [], 'p-h6': []}
+          allow_any_instance_of(Board).to receive(:valid_moves).with(:white).and_return(valid_moves)
+          allow_any_instance_of(King).to receive(:check).and_return(false)
+        end
+        it 'returns true' do
+          expect(player1.stalemate?).to be true 
+        end
+      end
+    end
+
+    context 'when there are still moves remaining' do
+      before do
+        valid_moves = {'k-d3': %i[d5 d7], 'n-d1': [], 'p-h6': []}
+        allow_any_instance_of(Board).to receive(:valid_moves).with(:white).and_return(valid_moves)
+        allow_any_instance_of(King).to receive(:check).and_return(false)
+      end
+
+      it 'returns false' do
+        expect(player1.stalemate?).to be false
+      end
+    end
+  end
+
 end

@@ -31,21 +31,20 @@ class Player
 
   # checks input validity
   # ... returns null if input is invalid
-  # @param move [Hash] piece_key-in_cell: to_cell:
+  # @param move [Hash] piece_key: in_cell: to_cell:
   def valid(move)
-    piece = move[:piece]
+    piece = "#{move[:piece]}-#{move[:in_cell]}"
     to_cell = move[:to_cell]
 
-    allowed_moves = @board.valid_moves(@color)
-    allowed_moves[piece]&.include?(to_cell) || false
+    available_moves[piece]&.include?(to_cell) || false
   end
 
   # calls functions for updating cell states
-  # @param player_move [Hash] consisting of keys piece_key, in_cell and to_cell 
-  # @param board_db [Hash] cell keys and correspoding cells
-  def execute(player_move, board_db)
-    in_cell = board_db[player_move[:in_cell]]
-    to_cell = board_db[player_move[:to_cell]]
+  # @param move [Hash] consisting of keys piece_key, in_cell and to_cell 
+  # @param [Hash] cell keys and correspoding cells
+  def execute(move)
+    in_cell = move[:in_cell]
+    to_cell = move[:to_cell]
 
     in_cell.move_piece_to(to_cell)
   end
@@ -57,9 +56,32 @@ class Player
   # @return [Hash]
   def format_input(input)
     inputs = input.split('-')
-    piece = inputs[0..1].join('-')
+    piece = input[0].to_sym
+    in_cell = input[1].to_sym
     to_cell = inputs.last.to_sym
 
-    { piece: piece, to_cell: to_cell }
+    { piece: piece, in_cell: in_cell,to_cell: to_cell }
+  end
+
+  def checkmate?
+    @king.check && no_more_moves
+  end
+
+  def stalemate?
+    !@king.check && no_more_moves
+  end
+
+  private
+
+  # checks if all remaining pieces
+  # have no more moves
+  def no_more_moves
+    available_moves.values.all?(&:empty?)
+  end
+
+  # queries for the available moves
+  # for all remaining pieces
+  def available_moves
+    @board.valid_moves(@color)
   end
 end
