@@ -52,7 +52,7 @@ module MappingTools
 
   # remaps all the cells for which cell has path leading to. This cells
   # ... are referenced thru cell.to_connections
-  def map_paths_from(cell)
+  def map_paths_from(cell) 
     piece = cell.piece
     connections = piece.scope(cell.coordinate).map { |direction| get_path(direction) }
     cell.connect(connections)
