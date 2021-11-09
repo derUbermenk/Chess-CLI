@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require_relative 'board_elements/cell'
 require_relative 'board_elements/piece'
+require_relative '../lib/board'
 require_relative 'io/io'
 
 class Player
@@ -8,18 +9,19 @@ class Player
 
   # @param color [String]
   # @param king [King]
-  def initialize(color, king)
+  # @param board [Board] this is where moves are executed
+  def initialize(color, king, board)
     @color = color
     @king = king
+    @board = board
   end
 
   # verifies and updates pieces if player_move is valid
   # @param player_move [String] the move command
-  # @param board_db [Hash] cell keys and corresponding cell objects 
-  def move(input, board_db)
+  def move(input)
     loop do
       player_move = format_input(input)
-      return execute(player_move, board_db) if valid(player_move, board_db)
+      return execute(player_move) if valid(player_move)
 
       input = verify_input('', 'invalid move') do |player_input|
         player_input.match?(MOVE_SYNTAX)
@@ -30,10 +32,11 @@ class Player
   # checks input validity
   # ... returns null if input is invalid
   # @param move [Hash] piece_key-in_cell: to_cell:
-  def valid(move, allowed_moves)
+  def valid(move)
     piece = move[:piece]
     to_cell = move[:to_cell]
 
+    allowed_moves = @board.valid_moves(@color)
     allowed_moves[piece]&.include?(to_cell) || false
   end
 
@@ -53,7 +56,10 @@ class Player
   # @param input [String] <piece_key>-<in_cell>-<to_cell>
   # @return [Hash]
   def format_input(input)
-    inputs = input.split('-').map(&:to_sym)
-    Hash[%i[piece_key in_cell to_cell].zip(inputs)]
+    inputs = input.split('-')
+    piece = inputs[0..1].join('-')
+    to_cell = inputs.last.to_sym
+
+    { piece: piece, to_cell: to_cell }
   end
 end
