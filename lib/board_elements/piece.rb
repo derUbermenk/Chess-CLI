@@ -4,8 +4,10 @@ require_relative '../io/symbols'
 
 # Parent Class of all chess pieces
 class Piece
-  attr_accessor :moves, :coordinate
-  attr_reader :color, :key, :multiline
+  attr_accessor :moves, :coordinate 
+  attr_reader :color, :key, :multiline,
+              :symbol
+
 
   include ChessSymbols
 

@@ -81,7 +81,7 @@ class Cell
   # the piece of the cell or the square 
   # ... if no piece is available
   def show
-    piece || square
+    piece&.symbol || square
   end
 
 
