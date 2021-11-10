@@ -4,6 +4,7 @@ require 'yaml'
 require_relative 'game'
 require_relative 'io/io'
 
+# handles loading new and old games 
 class Main
   include ChessIO
 

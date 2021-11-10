@@ -125,5 +125,4 @@ describe Player do
       end
     end
   end
-
 end

@@ -108,6 +108,33 @@ describe Board do
     end
   end
 
+  describe '#show' do
+    it 'shows an empty board' do
+      board.show
+    end
+
+    context 'when showing a board with pieces' do
+      it 'shows a new initialized board' do
+        board = Board.new
+        board.show
+      end
+    end
+
+    context 'after moving a piece' do
+      it 'updates the board to the updated positions' do
+        board = Board.new
+        db = board.board_db
+        puts "\nunmoved state"
+        board.show
+        board.move_piece(db[:b2], db[:b4])
+        board.move_piece(db[:d7], db[:d5])
+        board.move_piece(db[:c1], db[:a3])
+        puts "\nmoved state"
+        board.show
+      end
+    end
+  end
+
   describe '#valid_moves' do
     it "a hash of containing keys -- piece-in_cell and values 
       arrays of valid connections, given a piece color" do; end

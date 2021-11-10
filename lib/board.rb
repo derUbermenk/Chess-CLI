@@ -71,30 +71,13 @@ class Board
 
   # outputs the board in the cli
   def show
-    ordered_rows = @board_cartesian.reverse.map(&:contents)
-    formatted_rows = ordered_rows.map { |row| " #{row.join('|')} " }
-
+    formatted_rows = format_rows(row_contents)
     puts formatted_rows.join("\n")
   end
 
-  # returns a hash of all cells containing piece color and their valid
-  # .... connections
-  # ... this will require the pieces to record their coordinates
+  # returns a hash of all cells containing
+  # piece color and their valid connections
   def valid_moves(color)
-    # get the cells containing piece of given color
-    # if king is in check
-      # get check removers :: cells that can remove check
-      # check removers are the only allowable moves
-      # then filter connections for each cell
-      # such that cell is not skewed and connection is in check re-
-      # movers
-    # otherwise if king is not in check
-    # for each cell filter the to connections by the ff
-    # cell must not be skewed -- empty otherwise
-    # to_connection must not contain same color
-
-    # return a hash with <piece-in_cell>: moves
-
     remaining_pieces = @pieces[color]
 
     remaining_pieces.each_with_object({}) do |(piece_key, pieces_), piece_moves|
@@ -198,5 +181,31 @@ class Board
                               king.check_removers = [checking_cell.key]
                             end
     end
+  end
+
+  private  
+
+  def format_rows(rows)
+    rows = rows.reverse
+    row_indxs = [*0..9].reverse
+    normal_row = ->(indx) { "#{indx} | #{rows[indx].join(' | ')} | #{indx}" }
+    column_row = ->(indx) { "    #{rows[indx].join('   ')}    " }
+
+    row_indxs.each_with_object([]) do |indx, row_arr|
+      formatted_row = [0, 9].include?(indx) ? column_row.call(indx) : normal_row.call(indx)
+      row_arr << formatted_row
+    end
+  end
+
+  # extract cell contents from all rows in the board_cartesian
+  # ... and organizes the contents by rows.
+  def row_contents
+    contents = @board_cartesian.reverse.map do |row|
+      row.map(&:show)
+    end
+
+    column_indexes = [*'a'..'h']
+    contents.unshift(column_indexes)
+    contents.append(column_indexes)
   end
 end
