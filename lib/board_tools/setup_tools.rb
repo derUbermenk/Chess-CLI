@@ -16,9 +16,9 @@ module SetupInstructions
       columns.each do |column|
         cell_key = (column + row).to_sym
         board_db[cell_key] = Cell.new(cell_key, squares.first)
-        squares.rotate
+        squares.rotate!
       end
-      squares.rotate
+      squares.rotate!
     end
 
     board_db
