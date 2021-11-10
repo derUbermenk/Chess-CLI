@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'board_elements/cell'
 require_relative 'board_elements/piece'
 require_relative '../lib/board'

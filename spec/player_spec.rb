@@ -1,9 +1,28 @@
-# frozen_string_literal: true 
+# frozen_string_literal: true
 
 require_relative '../lib/player'
 
 describe Player do
   describe '#move' do
+  end
+
+  describe '#move' do
+    subject(:player) { described_class.new(:white, :king, :board) }
+    let(:dummy_input) { { piece: :n, in_cell: :cell, to_cell: :cell } }
+    context 'when player entered invalid moves 3 times and valid move 1 time' do
+      before do
+        allow(player).to receive(:format_input).and_return(dummy_input).exactly(4).times
+        allow(player).to receive(:valid).with(dummy_input).and_return(false, false, false, true)
+        allow(player).to receive(:verify_input).and_return(true).at_least(3).times
+      end
+
+      it 'receives valid 3 times and executes 1 time' do
+        expect(player).to receive(:valid).exactly(4).times
+        expect(player).to receive(:execute).once
+
+        player.move(dummy_input)
+      end
+    end
   end
 
   describe '#valid' do

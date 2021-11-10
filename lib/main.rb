@@ -11,17 +11,17 @@ class Main
   def run
     main_instructions
     user_input = verify_input(input) { |input| %w[l n].include?(input) }
-    @game = case user_input
+    game = case user_input
             when 'l' then load_game
             when 'n' then new_game
             end
-    play
+    play(game)
   end
 
   # initiates player turns
   # @param game [Game]
-  def play
-    @game.play
+  def play(game)
+    game.play
   end
 
   def new_game
@@ -40,3 +40,5 @@ class Main
     Dir['saves/*.yml']
   end
 end
+
+Main.new.run

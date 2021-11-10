@@ -124,11 +124,13 @@ describe Board do
       it 'updates the board to the updated positions' do
         board = Board.new
         db = board.board_db
+
         puts "\nunmoved state"
         board.show
         board.move_piece(db[:b2], db[:b4])
         board.move_piece(db[:d7], db[:d5])
         board.move_piece(db[:c1], db[:a3])
+
         puts "\nmoved state"
         board.show
       end

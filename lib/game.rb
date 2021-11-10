@@ -12,13 +12,14 @@ class Game
 
   def initialize
     @board = Board.new
-    @player1 = Player.new('white', @board.king(:white), @board)
-    @player2 = Player.new('black', @board.king(:black), @board)
+    @player1 = Player.new(:white, @board.king(:white), @board)
+    @player2 = Player.new(:black, @board.king(:black), @board)
 
     @player_que = [@player1, @player2]
   end
 
   def play
+    show_board
     turn_order until end_game
 
     end_cause
