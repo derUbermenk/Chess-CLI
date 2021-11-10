@@ -12,8 +12,8 @@ class Game
 
   def initialize
     @board = Board.new
-    @player1 = Player.new('white', board.king(:white))
-    @player2 = Player.new('black', board.king(:black))
+    @player1 = Player.new('white', @board.king(:white), @board)
+    @player2 = Player.new('black', @board.king(:black), @board)
 
     @player_que = [@player1, @player2]
   end
@@ -27,9 +27,9 @@ class Game
   # switches between player to allow for moves
   def turn_order
     player_turn
-    @board.show
+    show_board
 
-    @player_que.rotate!
+    rotate_players
   end
 
   # gets input for player with regards to saving and
@@ -50,14 +50,14 @@ class Game
 
   # checks if an end game condition has been met
   def end_game
-    current_player.checkmate? || stalemate?
+    current_player.checkmate? || current_player.stalemate?
   end
 
   # checks if an end_cause has been done
   def end_cause
     if current_player.checkmate?
       checkmate_message(@player_que.last)
-    elsif stalemate?
+    elsif current_player.stalemate?
       stalemate_message
     end
   end
@@ -74,12 +74,15 @@ class Game
   # not implemented yet
   def undo_move; end
 
-  # a stalemate is reached when the current players pieces have no more available moves
-  def stalemate?
-    board.stalemate?(current_player.color)
+  private
+
+  def show_board
+    @board.show
   end
 
-  private
+  def rotate_players
+    @player_que.rotate!
+  end
 
   def player_move(input)
     current_player.move(input)

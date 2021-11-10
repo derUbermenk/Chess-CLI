@@ -3,17 +3,78 @@
 require_relative '../lib/main'
 
 describe Game do
+  subject(:game) { described_class.new }
   describe '#play' do
-    # check internal methods
+    before do
+      allow(game).to receive(:turn_order).and_return(:turn_done)
+      allow(game).to receive(:end_game).and_return(false, false, false, false, false, true)
+      allow(game).to receive(:end_cause).and_return(:end_cause)
+    end
+    it 'ends the game only when an endgame condition has been reached' do
+      expect(game).to receive(:turn_order).exactly(5).times
+      game.play
+    end
   end
 
   describe '#turn_order' do
-    subject(:game) { described_class.new }
-    it 'rotates player que and allow turn rotation' do; end
+    let(:player1) { double('Player1') }
+    let(:player2) { double('Player2') }
+    before do
+      game.instance_variable_set(:@player_que, [player1, player2])
+      allow(game).to receive(:player_turn).and_return(:done)
+      allow(game).to receive(:show_board).and_return(:done)
+    end
+    it 'rotates player que and allow turn rotation' do
+      reversed_que = [player2, player1]
+      expect { game.turn_order }.to change { game.instance_variable_get(:@player_que) }.to(reversed_que)
+    end
+  end
+
+  describe '#end_game' do
+    context 'when end game due to stalemate' do
+      before do
+        current_player = instance_double('Player')
+        next_player = instance_double('Player')
+        allow(current_player).to receive(:checkmate?).and_return false 
+        allow(current_player).to receive(:stalemate?).and_return true
+
+        game.instance_variable_set(:@player_que, [current_player, next_player])
+      end
+      it 'returns true' do
+        expect(game.end_game).to be true
+      end
+    end
+
+    context 'when end game due to checkmate' do
+      before do
+        current_player = instance_double('Player')
+        next_player = instance_double('Player')
+        allow(current_player).to receive(:checkmate?).and_return true
+        allow(current_player).to receive(:stalemate?).and_return false
+
+        game.instance_variable_set(:@player_que, [current_player, next_player])
+      end
+      it 'returns true' do
+        expect(game.end_game).to be true
+      end
+    end
+
+    context 'when current player is neither in checkmate? nor stalemate?' do
+      before do
+        current_player = instance_double('Player')
+        next_player = instance_double('Player')
+        allow(current_player).to receive(:checkmate?).and_return false 
+        allow(current_player).to receive(:stalemate?).and_return false
+
+        game.instance_variable_set(:@player_que, [current_player, next_player])
+      end
+      it 'returns false' do
+        expect(game.end_game).to be false 
+      end
+    end
   end
 
   describe '#player_turn' do
-    subject(:game) { described_class.new }
     let(:valid_move_format) { 'p-d4-d5' }
     let(:valid_save_format) { 'ss-saveGame1' }
     let(:invalid_move_format) { 'rr2-d7-d8' }
@@ -59,14 +120,6 @@ describe Game do
         game.player_turn
       end
     end
-  end
-
-  describe '#end_game?' do
-    it 'checks if end game conditions have been met' do; end
-  end
-
-  describe '#end_cause' do
-    it 'returns a message containing why the game ended' do; end
   end
 
   describe '#save' do
