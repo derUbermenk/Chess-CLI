@@ -8,17 +8,15 @@ describe Main do
   describe '#run' do
     context 'when player chooses to load game' do
       before do
-        old_game = Game.new
         allow(main).to receive(:main_instructions)
         allow(main).to receive(:verify_input).and_return('l')
-        allow(main).to receive(:load_game).and_return(old_game)
-        allow_any_instance_of(Game).to receive(:play)
+        allow(main).to receive(:load_game)
       end
 
       it 'loads a pre-existing game' do
         expect(main).to receive(:load_game)
-        expect_any_instance_of(Game).to_not receive(:initialize)
-        expect_any_instance_of(Game).to receive(:play)
+        expect(main).to_not receive(:new_game)
+        expect(main).to receive(:play)
         main.run
       end
     end
@@ -27,13 +25,12 @@ describe Main do
       before do
         allow(main).to receive(:main_instructions)
         allow(main).to receive(:verify_input).and_return('n')
-        allow_any_instance_of(Game).to receive(:play)
       end
 
       it 'initializes a new game' do
         expect(main).to_not receive(:load_game)
-        expect_any_instance_of(Game).to receive(:initialize)
-        expect_any_instance_of(Game).to receive(:play)
+        expect(main).to receive(:new_game)
+        expect(main).to receive(:play)
         main.run
       end
     end

@@ -10,10 +10,21 @@ class Main
   def run
     main_instructions
     user_input = verify_input(input) { |input| %w[l n].include?(input) }
-    game = load_game if user_input == 'l'
-    game = Game.new if user_input == 'n'
+    @game = case user_input
+            when 'l' then load_game
+            when 'n' then new_game
+            end
+    play
+  end
 
-    game.play
+  # initiates player turns
+  # @param game [Game]
+  def play
+    @game.play
+  end
+
+  def new_game
+    Game.new
   end
 
   def load_game
