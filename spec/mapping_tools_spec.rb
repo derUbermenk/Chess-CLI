@@ -144,13 +144,15 @@ describe MappingTools do
       piece is placed in it" do
       before do
         db[:d2].piece = Rook.new(:white)
+        db[:d2].piece.coordinate = db[:d2].coordinate
         board.map_paths_from(db[:d2])
         db[:d4].piece = Knight.new(:black)
+        db[:d4].piece.coordinate = db[:d4].coordinate
       end
 
       it 'makes the connection call update direction with piece' do
-        new_path = [db[:d4], db[:d3]]
-        expect(cell_connector).to receive(:update_path).with(db[:d4], new_path)
+        new_path = [db[:d3], db[:d4]]
+        expect(cell_connector).to receive(:update_path).with(db[:d2], new_path)
         board.map_paths_to(db[:d4])
       end
     end

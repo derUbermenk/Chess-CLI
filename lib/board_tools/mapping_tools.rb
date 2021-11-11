@@ -40,12 +40,13 @@ module MappingTools
   # ... referenced through cell.from_connections
   # @param cell [Cell]
   def map_paths_to(cell)
-    cell.from_connections.each_value do |connection|
-      if connection.piece
-        new_path = get_path(make_direction(connection.coordinate, cell.coordinate))
-        connection.update_path(cell.key, new_path) if connection.piece.multiline
-      else
-        next
+    cell.from_connections.each_value do |piece|
+      next unless piece.multiline
+
+      origin_coordinate = piece.coordinate
+      path_origin = equiv_cell(origin_coordinate) 
+      new_path = get_path(make_direction(origin_coordinate, cell.coordinate))
+      @cell_connector.update_path(path_origin, new_path)
       end
     end
   end
