@@ -100,18 +100,24 @@ module MappingTools
 
   #### HELPER #####
 
-  # converts an array of directions(array of cells) to cell collections
-  # @param direction [Array] array of coordinates 
-  def convert_to_cells(direction)
-    direction.map do |coordinate|
-      equiv_cell(coordinate)
+  # converts an array of cell convertibles to cells
+  # @param line [Array] either an array of coordinates -- direction
+  # ... or an array of cell_keys
+  def convert_to_cells(line, db = @board_cartesian, input = :coords)
+    line.map do |id|
+      equiv_cell(id, db, input)
     end
   end
 
-  def equiv_cell(coordinate)
-    x = coordinate[0]
-    y = coordinate[1]
-    @board_cartesian[y][x]
+  def equiv_cell(id, db = @board_cartesian, input = :coords)
+    case input
+    when :coords
+      x = id[0]
+      y = id[1]
+      db[y][x]
+    when :cell_key
+      db[id]
+    end
   end
 
   # make a direction from point_start through through_point
@@ -135,6 +141,13 @@ module MappingTools
     cell_equivalents.find.with_object({}) do |cell, path|
       path[cell.key] = cell
       !cell.piece.nil?
+    end
+  end
+
+  def convert_to_keys(to_connections)
+    to_connections.each_with_object([]) do |direction, keys|
+      #direction.each_value { |cell| keys << cell.key }
+      keys.concat(direction.values.map(&:key))
     end
   end
 
@@ -221,10 +234,106 @@ module MappingTools
     end
   end
 
-  def convert_to_keys(to_connections)
-    to_connections.each_with_object([]) do |direction, keys|
-      #direction.each_value { |cell| keys << cell.key }
-      keys.concat(direction.values.map(&:key))
+  # Cell connector
+  class CellConnector
+
+    def initialize(db)
+      @db = db
+    end
+
+    # connects cells to its to connections
+    def connect(cell, connections)
+      cell.to_connections = connections.map do |direction|
+        direction.each_with_object({}) do |cell_, direction_|
+          add_ref(cell, cell_)
+          direction_[cell_.key] = cell_.piece
+        end
+      end
+    end
+
+    # disconnect cells from all its to connections
+    def disconnect(cell, board_db)
+      connections = cell.to_connections.map(&:keys).flatten 
+      connections.each { |key| delete_ref(cell, board_db[key]) }
+      cell.to_connections = []
+    end
+
+    def update_path(cell, new_path)
+      nearest_cell = new_path.first
+
+      cell.to_connections.map! do |old_path|
+        # the old path to be updated with the new path contains the same set of keys
+        if old_path[nearest_cell.key]
+          adjust_path(cell, old_path, new_path)
+        else
+          old_path
+        end
+      end
+    end
+
+    private
+
+    # adds a reference to referenced_cell in cell2.from_connections
+    def add_ref(referenced_cell, cell2)
+      cell2.from_connections[referenced_cell.key] = referenced_cell.piece
+    end
+
+    # deletes reference to referenced_cell in cell2.from_connections 
+    def delete_ref(referenced_cell, cell2)
+      cell2.from_connections.delete(referenced_cell.key)
+    end
+
+    # @param origin [Cell]
+    # @param old_path [Hash] containing cell_key and piece 
+    # @param new_path [Array] array of cells 
+    def adjust_path(origin, old_path, new_path)
+      if old_path.size > new_path.size
+        cut_path(origin, old_path, new_path)
+      elsif old_path.size < new_path.size
+        extend_path(origin, old_path, new_path)
+      end
+    end
+
+    # deletes the ref to self in all from connections in old path that are not 
+    # ... in new path
+    # @param origin [Cell]
+    # @param old_path [Hash] containing cell_key and piece 
+    # @param new_path [Array] array of cells 
+    def cut_path(origin, old_path, new_path)
+      old_path = convert_to_cells(old_path)
+      excluded_cells = old_path - new_path
+      excluded_cells.map { |excluded_cell| delete_ref(origin, excluded_cell) }
+
+      convert_to_cell_format(new_path)
+    end
+
+    # adds a ref to self in all the from connections in the new path that were
+    # ... initially not in the old path
+    # @param origin [Cell]
+    # @param old_path [Hash] containing cell_key and piece 
+    # @param new_path [Array] array of cells 
+    def extend_path(origin, old_path, new_path)
+      puts 'im here'
+      old_path = convert_to_cells(old_path)
+      additional_cells = new_path - old_path
+      puts "some path #{additional_cells}"
+      additional_cells.map{ |additional_cell| add_ref(origin, additional_cell) }
+
+      convert_to_cell_format(new_path)
+    end
+
+    def convert_to_cells(path)
+      path.each_key.with_object([]) do |key, path|
+        path << @db[key]
+      end
+    end
+
+    # converts a path -- an array of cell into cell format
+    # @param path [Array]
+    def convert_to_cell_format(path)
+      path.each_with_object({}) do |cell, path_format| 
+        path_format[cell.key] = cell.piece
+      end
     end
   end
 end

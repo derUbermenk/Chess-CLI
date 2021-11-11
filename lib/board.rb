@@ -24,6 +24,7 @@ class Board
     @board_cartesian = create_board_cartesian
     @pieces = create_pieces
     @king_cells = {} # keeps track of the cell containing king
+    @cell_connector = CellConnector.new(@board_db)
 
     place_pieces unless empty
   end

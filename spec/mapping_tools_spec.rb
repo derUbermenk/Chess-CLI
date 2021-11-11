@@ -1,10 +1,113 @@
 # frozen_string_literal: true
 
 require_relative '../lib/board'
+require_relative '../lib/board_tools/mapping_tools'
 
 describe MappingTools do
   let(:board) { Board.new(empty: true) }
   let(:db) { board.board_db }
+
+  describe 'CellConnector' do
+    let(:cc) { MappingTools::CellConnector.new(db) }
+
+    describe '#connect' do
+      let(:new_connections) {
+        [
+          [db[:d4]], [db[:d5]], [db[:c5]], [db[:b5]],
+          [db[:b4]], [db[:b3]], [db[:c3]], [db[:d3]]
+        ]
+      }
+      let(:c4) { db[:c4]}
+
+      context 'when connecting a cell to the given connections' do
+        it 'changes cell.to_connections to an array of 
+          hashes with cell key and piece as value' do
+          expected_connections = [
+            { d4: nil }, { d5: nil }, { c5: nil }, { b5: nil },
+            { b4: nil }, { b3: nil }, { c3: nil }, { d3: nil }
+          ]
+          expect { cc.connect(c4, new_connections) }.to change { c4.to_connections }.to(expected_connections)
+        end
+
+        it 'adds a reference to the cell in all the from connections of the cells mentioned' do
+          cc.connect(c4, new_connections)
+
+          new_connections.each do |direction|
+            direction.each { |cell| expect(cell.from_connections.keys).to include(:c4)}
+          end
+        end
+      end
+    end
+
+    describe '#disconnect' do
+      let(:a1) { db[:a1] }
+      let(:b4) { db[:b4] }
+      let(:b5) { db[:b5] }
+      context 'when disconnecting a1 f4rom b4 and b5' do
+        before do
+          a1.to_connections = [{ b4: nil }, { b5: nil }]
+          b4.from_connections = {a1: nil, b5: nil}
+          b5.from_connections = {a1: nil}
+        end
+        it 'removes refs to a1 in the from connections of b4' do
+          expect { cc.disconnect(a1, db) }.to change { b4.from_connections }.to({ b5: nil })
+        end
+        it 'removes refs to a1 in the from connections of b5' do
+          expect { cc.disconnect(a1, db) }.to change { b5.from_connections }.to({})
+        end
+      end
+    end
+
+    describe '#update_path' do
+      let(:white_pawn) { Pawn.new(:white) }
+      let(:d4) { db[:d4] }
+      
+      context 'when extending a path' do
+        before do
+          board.place(white_pawn, db[:d3])
+          d4.to_connections = [
+            { d3: white_pawn, d2: nil },
+            { c4: nil, b4: nil }
+          ]
+        end
+
+        it 'updates the path of the origin that is aligned with the new_path' do
+          new_path = [db[:d3], db[:d2], db[:d1]]
+          new_connections = [{ d3: white_pawn, d2: nil, d1: nil}, { c4: nil, b4: nil }]
+          expect { cc.update_path(d4, new_path) }.to change{ d4.to_connections }.to(new_connections)
+        end
+
+        it 'adds a reference to the origin of the path in the from connections of the additional path' do
+          new_path = [db[:d3], db[:d2], db[:d1]]
+          new_from_connections = { d4: nil }
+          expect { cc.update_path(d4, new_path) }.to change{ db[:d1].from_connections}.to(new_from_connections)
+        end
+      end
+
+      context 'when cutting a path' do
+        before do
+          board.place(white_pawn, db[:d3])
+          d4.to_connections = [
+            { d3: white_pawn, d2: nil, d1: nil },
+            { c4: nil, b4: nil }
+          ]
+          db[:d1].from_connections = { d4: nil }
+        end
+
+        it 'updates the path of the origin that is aligned with the new_path' do
+          new_path = [db[:d3]]
+          new_connections = [{ d3: white_pawn }, { c4: nil, b4: nil }]
+          expect { cc.update_path(d4, new_path) }.to change{ d4.to_connections }.to(new_connections)
+        end
+
+        it 'removes reference to origin from the cells excluded in the new path' do 
+          new_path = [db[:d3]]
+          empty = {}
+          expect { cc.update_path(d4, new_path) }.to change{ db[:d1].from_connections}.to(empty)
+        end
+      end
+    end
+  end
 
   describe '#placement_remap' do
     # test the ff functions
@@ -78,6 +181,13 @@ describe MappingTools do
           { c4: db[:c4], b4: db[:b4], a4: db[:a4] },
           { d3: db[:d3], d2: db[:d2], d1: db[:d1] }
         ]
+
+        <<-doc
+        connections = [
+          { e4: nil, f4: nil, g4: white_pawn },
+          { d5: nil}
+        ]
+        doc
 
         expect { board.map_paths_from(d4) }.to change{ d4.to_connections }.to(connections)
       end
