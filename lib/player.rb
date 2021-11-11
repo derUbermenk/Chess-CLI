@@ -8,6 +8,8 @@ require_relative 'io/io'
 class Player
   include ChessIO
 
+  attr_accessor :color
+
   # @param color [String]
   # @param king [King]
   # @param board [Board] this is where moves are executed
@@ -47,7 +49,7 @@ class Player
     in_cell = move[:in_cell]
     to_cell = move[:to_cell]
 
-    in_cell.move_piece_to(to_cell)
+    board.move_piece(in_cell, to_cell)
   end
 
   # formats player move in to hash
@@ -59,9 +61,9 @@ class Player
     inputs = input.split('-')
     piece = input[0].to_sym
     in_cell = input[1].to_sym
-    to_cell = inputs.last.to_sym
+    to_cell = inputs[2].to_sym
 
-    { piece: piece, in_cell: in_cell,to_cell: to_cell }
+    { piece: piece, in_cell: in_cell, to_cell: to_cell }
   end
 
   def checkmate?
@@ -72,17 +74,17 @@ class Player
     !@king.check && no_more_moves
   end
 
+  # queries for the available moves
+  # for all remaining pieces
+  def available_moves
+    @board.valid_moves(@color)
+  end
+
   private
 
   # checks if all remaining pieces
   # have no more moves
   def no_more_moves
     available_moves.values.all?(&:empty?)
-  end
-
-  # queries for the available moves
-  # for all remaining pieces
-  def available_moves
-    @board.valid_moves(@color)
   end
 end
