@@ -100,24 +100,18 @@ module MappingTools
 
   #### HELPER #####
 
-  # converts an array of cell convertibles to cells
-  # @param line [Array] either an array of coordinates -- direction
-  # ... or an array of cell_keys
-  def convert_to_cells(line, db = @board_cartesian, input = :coords)
-    line.map do |id|
-      equiv_cell(id, db, input)
+  # converts an array of coodinates(direction)
+  # to an array of cells
+  def convert_to_cells(direction)
+    direction.map do |coordinate|
+      equiv_cell(coordinate)
     end
   end
 
-  def equiv_cell(id, db = @board_cartesian, input = :coords)
-    case input
-    when :coords
-      x = id[0]
-      y = id[1]
-      db[y][x]
-    when :cell_key
-      db[id]
-    end
+  def equiv_cell(coordinate)
+    x = coordinate[0]
+    y = coordinate[1]
+    @board_cartesian[y][x]
   end
 
   # make a direction from point_start through through_point
@@ -258,13 +252,15 @@ module MappingTools
       cell.to_connections = []
     end
 
-    def update_path(cell, new_path)
+    # updates the path originating from the cell - origin
+    # @param origin [Cell]
+    def update_path(origin, new_path)
       nearest_cell = new_path.first
 
-      cell.to_connections.map! do |old_path|
+      origin.to_connections.map! do |old_path|
         # the old path to be updated with the new path contains the same set of keys
         if old_path[nearest_cell.key]
-          adjust_path(cell, old_path, new_path)
+          adjust_path(origin, old_path, new_path)
         else
           old_path
         end
@@ -313,10 +309,8 @@ module MappingTools
     # @param old_path [Hash] containing cell_key and piece 
     # @param new_path [Array] array of cells 
     def extend_path(origin, old_path, new_path)
-      puts 'im here'
       old_path = convert_to_cells(old_path)
       additional_cells = new_path - old_path
-      puts "some path #{additional_cells}"
       additional_cells.map{ |additional_cell| add_ref(origin, additional_cell) }
 
       convert_to_cell_format(new_path)

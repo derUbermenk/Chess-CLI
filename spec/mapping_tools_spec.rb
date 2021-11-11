@@ -176,18 +176,11 @@ describe MappingTools do
       it "changes the self.to_connections to an array of cell hash containing {e4..g4},
         {d5}, {c4..a4}, and {d3..d1}" do
         connections = [
-          { e4: db[:e4], f4: db[:f4], g4: db[:g4] },
-          { d5: db[:d5], d6: db[:d6] },
-          { c4: db[:c4], b4: db[:b4], a4: db[:a4] },
-          { d3: db[:d3], d2: db[:d2], d1: db[:d1] }
-        ]
-
-        <<-doc
-        connections = [
           { e4: nil, f4: nil, g4: white_pawn },
-          { d5: nil}
+          { d5: nil, d6: black_pawn }, 
+          { c4: nil, b4: nil, a4: nil },
+          { d3: nil, d2: nil, d1: nil }
         ]
-        doc
 
         expect { board.map_paths_from(d4) }.to change{ d4.to_connections }.to(connections)
       end
