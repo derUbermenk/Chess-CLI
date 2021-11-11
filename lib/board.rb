@@ -174,14 +174,15 @@ class Board
       # to an unchecked position
       king.check_removers = []
     elsif king.check_count == 1
-      checking_cell = checking_cells.values[0]
-      checking_piece = checking_cell.piece
+      checking_cell_key = checking_cells.keys[0]
+      checking_piece = checking_cells.values[0]
+      check_cell_coordinate = checking_piece.coordinate
 
       king.check_removers = if checking_piece.multiline
                               get_path(make_direction(king_cell.coordinate,
-                                                      checking_cell.coordinate)).keys
+                                                      check_cell_coordinate)).map(&:keys)
                             else
-                              king.check_removers = [checking_cell.key]
+                              king.check_removers = [checking_cell_key]
                             end
     end
   end

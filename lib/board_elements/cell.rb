@@ -62,15 +62,15 @@ class Cell
 
   # returns a hash of the from connections containing a piece of the given color 
   def checking_cells(color)
-    @from_connections.select { |key, cell| cell.piece.color == color }
+    @from_connections.select { |cell_key, piece| piece.color == color }
   end
 
   # check if self has no from connections
   # containing a piece of the given color 
   # @param color [Symbol]
   def not_checked_by(color)
-    @from_connections.values.all? do |cell| 
-      cell.piece.color != color
+    @from_connections.values.all? do |piece| 
+      piece.color != color
     end
   end
 

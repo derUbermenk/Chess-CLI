@@ -33,7 +33,7 @@ module MappingTools
   def removal_remap(cell)
     map_paths_to(cell)
 
-    cell.disconnect
+    @cell_connector.disconnect(cell)
   end
 
   # maps all the cells that have paths to cell. This cells are
@@ -47,7 +47,6 @@ module MappingTools
       path_origin = equiv_cell(origin_coordinate) 
       new_path = get_path(make_direction(origin_coordinate, cell.coordinate))
       @cell_connector.update_path(path_origin, new_path)
-      end
     end
   end
 
@@ -247,9 +246,9 @@ module MappingTools
     end
 
     # disconnect cells from all its to connections
-    def disconnect(cell, board_db)
+    def disconnect(cell)
       connections = cell.to_connections.map(&:keys).flatten 
-      connections.each { |key| delete_ref(cell, board_db[key]) }
+      connections.each { |key| delete_ref(cell, @db[key]) }
       cell.to_connections = []
     end
 

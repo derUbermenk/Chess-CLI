@@ -201,7 +201,7 @@ describe MappingTools do
         board.map_paths_from(d4)
 
         connections.each_value do |connection|
-          expect(connection.from_connections.keys).to include(d4.keys)
+          expect(connection.from_connections.keys).to include(d4.key)
         end
       end
     end
