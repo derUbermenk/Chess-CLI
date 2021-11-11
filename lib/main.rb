@@ -40,3 +40,6 @@ class Main
     Dir['saves/*.yml']
   end
 end
+
+main = Main.new
+main.run

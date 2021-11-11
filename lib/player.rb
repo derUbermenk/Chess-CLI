@@ -24,6 +24,7 @@ class Player
   def move(input)
     loop do
       player_move = format_input(input)
+      valid(player_move)
       return execute(player_move) if valid(player_move)
 
       input = verify_input('', 'invalid move') do |player_input|
@@ -46,8 +47,9 @@ class Player
   # @param move [Hash] consisting of keys piece_key, in_cell and to_cell 
   # @param [Hash] cell keys and correspoding cells
   def execute(move)
-    in_cell = move[:in_cell]
-    to_cell = move[:to_cell]
+    puts 'executing'
+    in_cell = @board.board_db[move[:in_cell]]
+    to_cell = @board.board_db[move[:to_cell]]
 
     board.move_piece(in_cell, to_cell)
   end
