@@ -50,10 +50,10 @@ module SetupInstructions
       {
         k: [King.new(:black)],
         q: [Queen.new(:black)],
-        n: Array.new(2, Knight.new(:black)),
-        b: Array.new(2, Bishop.new(:black)),
-        r: Array.new(2, Rook.new(:black)),
-        p: Array.new(8, Pawn.new(:black))
+        n: Array.new(2) { Knight.new(:black) },
+        b: Array.new(2) { Bishop.new(:black) },
+        r: Array.new(2) { Rook.new(:black) },
+        p: Array.new(8) { Pawn.new(:black) }
       }
     }
   end
