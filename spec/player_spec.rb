@@ -34,7 +34,7 @@ describe Player do
         allow(board).to receive(:valid_moves).with(:white).and_return(allowed_moves)
       end
       it 'returns false' do
-        move = {piece: :n, in_cell: :d4, to_cell: :a5}
+        move = { piece: :n, in_cell: :d4, to_cell: :a5 }
         validity = player1.valid(move)
         expect(validity).to be false
       end
@@ -142,6 +142,15 @@ describe Player do
       it 'returns false' do
         expect(player1.stalemate?).to be false
       end
+    end
+  end
+
+  describe '#format_input' do
+    subject(:player) { Player.new(:white, :king, :board) }
+    it 'returns the correct format of inputs' do
+      formatted_input = player.format_input('n-d3-d4')
+      expected_format = { piece: :n, in_cell: :d3, to_cell: :d4 }
+      expect(formatted_input).to eq(expected_format)
     end
   end
 end

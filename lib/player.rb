@@ -59,8 +59,8 @@ class Player
   # @return [Hash]
   def format_input(input)
     inputs = input.split('-')
-    piece = input[0].to_sym
-    in_cell = input[1].to_sym
+    piece = inputs[0].to_sym
+    in_cell = inputs[1].to_sym
     to_cell = inputs[2].to_sym
 
     { piece: piece, in_cell: in_cell, to_cell: to_cell }
