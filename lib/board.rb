@@ -12,7 +12,7 @@ require_relative '../lib/board_tools/setup_tools'
 #   @board_cartesian: array with [0][0] as cell a1 [7][7] as h8
 class Board
   attr_accessor :board_cartesian, :board_db, :pieces
-  attr_reader :king_cells
+  attr_reader :king_cells, :cell_connector
 
   include ChessSymbols
   include MappingTools

@@ -137,6 +137,8 @@ describe MappingTools do
   describe '#map_paths_to' do
     let(:board) { Board.new(empty: true) }
     let(:db) { board.board_db }
+    let(:cell_connector) { board.cell_connector }
+
 
     context "when the cell has a from connection from a multiline piece and a
       piece is placed in it" do
@@ -147,8 +149,8 @@ describe MappingTools do
       end
 
       it 'makes the connection call update direction with piece' do
-        new_path = { d4: db[:d4], d3: db[:d3] }
-        expect_any_instance_of(Cell).to receive(:update_path).with(:d4, new_path)
+        new_path = [db[:d4], db[:d3]]
+        expect(cell_connector).to receive(:update_path).with(db[:d4], new_path)
         board.map_paths_to(db[:d4])
       end
     end
@@ -175,6 +177,7 @@ describe MappingTools do
 
       it "changes the self.to_connections to an array of cell hash containing {e4..g4},
         {d5}, {c4..a4}, and {d3..d1}" do
+
         connections = [
           { e4: nil, f4: nil, g4: white_pawn },
           { d5: nil, d6: black_pawn }, 
@@ -196,8 +199,7 @@ describe MappingTools do
         board.map_paths_from(d4)
 
         connections.each_value do |connection|
-          d4_query = connection.from_connections[:d4]
-          expect(d4_query).to eq(d4)
+          expect(connection.from_connections.keys).to include(d4.keys)
         end
       end
     end

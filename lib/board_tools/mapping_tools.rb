@@ -52,10 +52,10 @@ module MappingTools
 
   # remaps all the cells for which cell has path leading to. This cells
   # ... are referenced thru cell.to_connections
-  def map_paths_from(cell) 
+  def map_paths_from(cell)
     piece = cell.piece
     connections = piece.scope(cell.coordinate).map { |direction| get_path(direction) }
-    cell.connect(connections)
+    @cell_connector.connect(cell, connections)
   end
 
   # returns an array of keys of the to_connections where cell can move to
@@ -132,8 +132,8 @@ module MappingTools
 
     # find the first non empty cell. but add the empty cells
     # ... and the first non empty cell to path in the process.
-    cell_equivalents.find.with_object({}) do |cell, path|
-      path[cell.key] = cell
+    cell_equivalents.find.with_object([]) do |cell, path|
+      path << cell
       !cell.piece.nil?
     end
   end
