@@ -79,7 +79,6 @@ class Board
   # piece color and their valid connections
   def valid_moves(color)
     remaining_pieces = @pieces[color]
-
     remaining_pieces.each_with_object({}) do |(piece_key, pieces_), piece_moves|
       pieces_.each do |piece|
         cell = equiv_cell(piece.coordinate)
@@ -99,7 +98,7 @@ class Board
     # ... the two are aligned -- by the limits of the board if the lines connecting
     # ... them have the slopes [nil, 0, -1, 1] -- vertical, horizontal, diagonal
 
-    return false unless [nil, 0, -1, 1].include?(slope) 
+    return false unless [nil, 0, -1, 1].include?(slope)
 
     case slope
     when nil
@@ -109,14 +108,17 @@ class Board
       path1 = get_path(make_direction(cell.coordinate, [0, cell.coordinate[1]]))
       path2 = get_path(make_direction(cell.coordinate, [7, cell.coordinate[1]]))
     when 1
-      path1 = get_path(make_direction(cell.coordinate, [cell.coordinate.map{ |coord| coord-1 }]))
-      path2 = get_path(make_direction(cell.coordinate, [cell.coordinate.map{ |coord| coord+1 }]))
+      path1 = get_path(make_direction(cell.coordinate, cell.coordinate.map{ |coord| coord-1 }))
+      path2 = get_path(make_direction(cell.coordinate, cell.coordinate.map{ |coord| coord+1 }))
     when -1
       path1 = get_path(make_direction(cell.coordinate, [cell.coordinate[0]-1,  cell.coordinate[1] + 1]))
       path2 = get_path(make_direction(cell.coordinate, [cell.coordinate[0]+1, cell.coordinate[1] - 1]))
     end
 
-    check_opposite_end = ->(opposite) do
+    # not skewed when either of the paths are empty, maybe piece is at edge
+    return false if path1.empty? || path2.empty?
+
+    check_opposite_end = lambda do |opposite|
       return false if opposite.empty?
 
       return false if opposite.values.last&.piece&.color == current_king.color

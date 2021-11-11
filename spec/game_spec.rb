@@ -79,7 +79,7 @@ describe Game do
     let(:valid_save_format) { 'ss-saveGame1' }
     let(:invalid_move_format) { 'rr2-d7-d8' }
 
-    context 'when input is follows proper_save_format then a proper move format' do
+    context 'when input follows proper_save_format then a proper move format' do
       before do
         allow_any_instance_of(Player).to receive(:move).and_return(true)
         allow(game).to receive(:input).and_return(valid_save_format, valid_move_format)
@@ -88,7 +88,9 @@ describe Game do
 
       it 'calls save game, then calls move' do
         expect(game).to receive(:save).with(valid_save_format)
-        expect_any_instance_of(Player).to receive(:move).with(valid_move_format).and_return(valid_move_format)
+        expect(game).to receive(:player_move).with(valid_move_format).and_return(valid_move_format)
+        expect(game).to_not receive(:invalid_input_message)
+        expect(game).to_not receive(:instructions_message)
         game.player_turn
       end
     end
@@ -110,7 +112,7 @@ describe Game do
 
     context 'when an improper format is entered as input twice and the proper input is made once' do
       before do
-        allow(game).to receive(:input).and_return(invalid_move_format, invalid_move_format,valid_move_format)
+        allow(game).to receive(:input).and_return(invalid_move_format, invalid_move_format, valid_move_format)
         allow_any_instance_of(Player).to receive(:move).and_return(valid_move_format)
       end
       it 'reports the invalid input and instruction twice and then allows the input' do

@@ -140,6 +140,7 @@ describe Board do
   describe '#valid_moves' do
     it "a hash of containing keys -- piece-in_cell and values 
       arrays of valid connections, given a piece color" do; end
+
     context 'when a piece is skewed it will not have any moves' do 
       let(:board) { Board.new(empty: true) }
       let(:db) { board.board_db }
@@ -168,6 +169,13 @@ describe Board do
       it 'returns empty moves for the skewed pieces' do
         expected_moves = { 'k-e4' => [:f4], 'p-d4' => [] }
         expect(board.valid_moves(:white)).to eq(expected_moves)
+      end
+    end
+
+    context 'when calculating the valid moves for a full board' do
+      it 'returns the valid moves' do
+        board = Board.new
+        p board.valid_moves(:white)
       end
     end
   end

@@ -39,10 +39,16 @@ class Game
   def player_turn
     loop do
       player_input = input
-      save player_input if player_input.match?(SAVE_SYNTAX)
-      undo_game if player_input.match?(UNDO_SYNTAX)
 
-      return current_player.move(player_input) if player_input.match?(MOVE_SYNTAX)
+      if save_or_undo(player_input) 
+        save(player_input) if player_input.match?(SAVE_SYNTAX)
+        undo_game if player_input.match?(UNDO_SYNTAX)
+
+        # then get a new input
+        player_input = input
+      end
+
+      return player_move(player_input) if player_input.match?(MOVE_SYNTAX)
 
       invalid_input_message
       instructions_message
@@ -87,6 +93,10 @@ class Game
 
   def player_move(input)
     current_player.move(input)
+  end
+
+  def save_or_undo(input)
+    input.match?(SAVE_SYNTAX) || input.match?(MOVE_SYNTAX)
   end
 
   def current_player

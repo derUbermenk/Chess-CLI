@@ -12,9 +12,9 @@ class Main
     main_instructions
     user_input = verify_input(input) { |input| %w[l n].include?(input) }
     game = case user_input
-            when 'l' then load_game
-            when 'n' then new_game
-            end
+           when 'l' then load_game
+           when 'n' then new_game
+           end
     play(game)
   end
 
@@ -40,5 +40,3 @@ class Main
     Dir['saves/*.yml']
   end
 end
-
-Main.new.run
