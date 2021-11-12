@@ -21,10 +21,8 @@ describe Cell do
       no other connection" do
       context 'when checking if it is not in check by a black piece' do
         it 'returns false' do
-          a8 = Cell.new(:a8, :square)
-          a8.piece = Rook.new(:black)
           a7 = Cell.new(:a7, :square)
-          a7.from_connections = { a8: a8 }
+          a7.from_connections = { a8: Rook.new(:black) }
 
           expect(a7.not_checked_by(:black)).to be false
         end
@@ -32,10 +30,8 @@ describe Cell do
 
       context 'when checking if it is not in check by a white piece' do
         it 'returns true' do
-          a8 = Cell.new(:a8, :square)
-          a8.piece = Rook.new(:black)
           a7 = Cell.new(:a7, :square)
-          a7.from_connections = { a8: a8 }
+          a7.from_connections = { a8: Rook.new(:black) }
 
           expect(a7.not_checked_by(:white)).to be true 
         end
@@ -46,10 +42,8 @@ describe Cell do
       no other connection" do
       context 'when checking if it is not in check by a black piece' do
         it 'returns true' do
-          a8 = Cell.new(:a8, :square)
-          a8.piece = Rook.new(:white)
           a7 = Cell.new(:a7, :square)
-          a7.from_connections = { a8: a8 }
+          a7.from_connections = { a8: Rook.new(:white) }
 
           expect(a7.not_checked_by(:black)).to be true 
         end
@@ -57,10 +51,8 @@ describe Cell do
 
       context 'when checking if it is not in check by a white piece' do
         it 'returns false' do
-          a8 = Cell.new(:a8, :square)
-          a8.piece = Rook.new(:white)
           a7 = Cell.new(:a7, :square)
-          a7.from_connections = { a8: a8 }
+          a7.from_connections = { a8: Rook.new(:white) }
 
           expect(a7.not_checked_by(:white)).to be false 
         end
