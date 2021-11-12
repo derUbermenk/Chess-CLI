@@ -258,7 +258,6 @@ module MappingTools
       nearest_cell = new_path.first
 
       origin.to_connections.map! do |old_path|
-        # the old path to be updated with the new path contains the same set of keys
         if old_path.keys.include?(nearest_cell.key)
           adjust_path(origin, old_path, new_path)
         else
@@ -283,7 +282,11 @@ module MappingTools
     # @param old_path [Hash] containing cell_key and piece 
     # @param new_path [Array] array of cells 
     def adjust_path(origin, old_path, new_path)
-      if old_path.size > new_path.size
+      if old_path.size == new_path.size
+        new_cell = new_path.last
+        add_ref(origin, new_cell)
+        convert_to_cell_format(new_path)
+      elsif old_path.size > new_path.size
         cut_path(origin, old_path, new_path)
       elsif old_path.size < new_path.size
         extend_path(origin, old_path, new_path)
