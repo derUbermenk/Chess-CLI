@@ -83,14 +83,8 @@ describe Board do
           { b5: nil, a6: nil },
           { b4: nil, a4: nil },
           { b3: nil, a2: nil },
-          { 
-            c3: nil, c2: nil,
-            c1: nil
-          },
-          {
-            d3: nil, e2: nil,
-            f1: nil
-          }
+          { c3: nil, c2: nil, c1: nil },
+          { d3: nil, e2: nil, f1: nil }
         ]
         expect { board.place(white_pawn, db[:d4]) }.to change { db[:c4].to_connections }.to(expected_connections)
       end

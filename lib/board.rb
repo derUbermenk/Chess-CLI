@@ -36,8 +36,9 @@ class Board
     moving_color = piece.color
     waiting_color = opposite_color(moving_color)
 
-    place(piece, to_cell)
+
     removal_remap(in_cell)
+    place(piece, to_cell)
 
     assess_check(waiting_color) unless @king_cells[waiting_color].not_checked_by(moving_color)
   end
