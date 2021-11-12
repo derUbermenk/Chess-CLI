@@ -56,19 +56,8 @@ describe Board do
       it 'cuts the path of the pre-existing multiline piece shorter' do
         white_pawn = Pawn.new(:white)
         expected_connections = [
-          {
-            h2: db[:h2],
-            h3: db[:h3],
-            h4: db[:h4],
-            h5: db[:h5],
-            h6: db[:h6],
-            h7: db[:h7],
-            h8: db[:h8]
-          },
-          {
-            g1: db[:g1],
-            f1: db[:f1]
-          }
+          { h2: nil, h3: nil, h4: nil, h5: nil, h6: nil, h7: nil, h8: nil },
+          { g1: nil, f1: white_pawn }
         ]
         expect { board.place(white_pawn, db[:f1]) }.to change { db[:h1].to_connections }.to(expected_connections)
       end
@@ -82,25 +71,25 @@ describe Board do
       it 'cuts the path of the pre-existing multiline piece shorter' do
         white_pawn = Pawn.new(:white)
         expected_connections = [
-          { d4: db[:d4] },
+          { d4: white_pawn },
           {
-            d5: db[:d5], e6: db[:e6], 
-            f7: db[:f7], g8: db[:g8]
+            d5: nil, e6: nil,
+            f7: nil, g8: nil
           },
           {
-            c5: db[:c5], c6: db[:c6],
-            c7: db[:c7], c8: db[:c8]
+            c5: nil, c6: nil,
+            c7: nil, c8: nil
           },
-          { b5: db[:b5], a6: db[:a6] },
-          { b4: db[:b4], a4: db[:a4] },
-          { b3: db[:b3], a2: db[:a2] },
+          { b5: nil, a6: nil },
+          { b4: nil, a4: nil },
+          { b3: nil, a2: nil },
           { 
-            c3: db[:c3], c2: db[:c2],
-            c1: db[:c1]
+            c3: nil, c2: nil,
+            c1: nil
           },
           {
-            d3: db[:d3], e2: db[:e2],
-            f1: db[:f1]
+            d3: nil, e2: nil,
+            f1: nil
           }
         ]
         expect { board.place(white_pawn, db[:d4]) }.to change { db[:c4].to_connections }.to(expected_connections)

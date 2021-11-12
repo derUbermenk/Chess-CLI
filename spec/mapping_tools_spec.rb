@@ -172,7 +172,7 @@ describe MappingTools do
         g4 = db[:g4]
         d6 = db[:d6]
 
-        d4.piece = black_rook 
+        d4.piece = black_rook
         g4.piece = white_pawn
         d6.piece = black_pawn
       end
@@ -182,7 +182,7 @@ describe MappingTools do
 
         connections = [
           { e4: nil, f4: nil, g4: white_pawn },
-          { d5: nil, d6: black_pawn }, 
+          { d5: nil, d6: black_pawn },
           { c4: nil, b4: nil, a4: nil },
           { d3: nil, d2: nil, d1: nil }
         ]
