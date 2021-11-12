@@ -23,8 +23,8 @@ module MappingTools
   # ... assuming a piece has been placed
   # @param cell [Cell]
   def placement_remap(cell)
-    map_paths_to(cell)
     map_paths_from(cell)
+    map_paths_to(cell)
   end
 
   # remaps connections to and from cell
@@ -44,7 +44,7 @@ module MappingTools
       next unless piece.multiline
 
       origin_coordinate = piece.coordinate
-      path_origin = equiv_cell(origin_coordinate) 
+      path_origin = equiv_cell(origin_coordinate)
       new_path = get_path(make_direction(origin_coordinate, cell.coordinate))
       @cell_connector.update_path(path_origin, new_path)
     end
@@ -259,7 +259,7 @@ module MappingTools
 
       origin.to_connections.map! do |old_path|
         # the old path to be updated with the new path contains the same set of keys
-        if old_path[nearest_cell.key]
+        if old_path.keys.include?(nearest_cell.key)
           adjust_path(origin, old_path, new_path)
         else
           old_path

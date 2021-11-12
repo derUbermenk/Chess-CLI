@@ -8,7 +8,7 @@ describe MappingTools do
   let(:db) { board.board_db }
 
   describe 'CellConnector' do
-    let(:cc) { MappingTools::CellConnector.new(db) }
+    let(:cc) { board.cell_connector }
 
     describe '#connect' do
       let(:new_connections) {
@@ -50,10 +50,10 @@ describe MappingTools do
           b5.from_connections = {a1: nil}
         end
         it 'removes refs to a1 in the from connections of b4' do
-          expect { cc.disconnect(a1, db) }.to change { b4.from_connections }.to({ b5: nil })
+          expect { cc.disconnect(a1) }.to change { b4.from_connections }.to({ b5: nil })
         end
         it 'removes refs to a1 in the from connections of b5' do
-          expect { cc.disconnect(a1, db) }.to change { b5.from_connections }.to({})
+          expect { cc.disconnect(a1) }.to change { b5.from_connections }.to({})
         end
       end
     end
@@ -64,16 +64,16 @@ describe MappingTools do
       
       context 'when extending a path' do
         before do
-          board.place(white_pawn, db[:d3])
+          db[:d1].piece = white_pawn
           d4.to_connections = [
-            { d3: white_pawn, d2: nil },
+            { d3: nil, d2: nil },
             { c4: nil, b4: nil }
           ]
         end
 
         it 'updates the path of the origin that is aligned with the new_path' do
           new_path = [db[:d3], db[:d2], db[:d1]]
-          new_connections = [{ d3: white_pawn, d2: nil, d1: nil}, { c4: nil, b4: nil }]
+          new_connections = [{ d3: nil, d2: nil, d1: white_pawn }, { c4: nil, b4: nil }]
           expect { cc.update_path(d4, new_path) }.to change{ d4.to_connections }.to(new_connections)
         end
 
@@ -86,7 +86,7 @@ describe MappingTools do
 
       context 'when cutting a path' do
         before do
-          board.place(white_pawn, db[:d3])
+          db[:d3].piece = white_pawn
           d4.to_connections = [
             { d3: white_pawn, d2: nil, d1: nil },
             { c4: nil, b4: nil }
@@ -129,7 +129,7 @@ describe MappingTools do
       cell = board.board_db[:a7]
 
       expect(board).to receive(:map_paths_to).with(cell)
-      expect(cell).to receive(:disconnect)
+      expect(board.cell_connector).to receive(:disconnect).with(cell)
       board.removal_remap(cell)
     end
   end
