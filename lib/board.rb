@@ -181,7 +181,7 @@ class Board
 
       king.check_removers = if checking_piece.multiline
                               get_path(make_direction(king_cell.coordinate,
-                                                      check_cell_coordinate)).map(&:keys)
+                                                      check_cell_coordinate)).map(&:key)
                             else
                               king.check_removers = [checking_cell_key]
                             end
