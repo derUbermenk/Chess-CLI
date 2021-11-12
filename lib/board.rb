@@ -123,15 +123,15 @@ class Board
     check_opposite_end = lambda do |opposite|
       return false if opposite.empty?
 
-      return false if opposite.values.last&.piece&.color == current_king.color
+      return false if opposite.last&.piece&.color == current_king.color
 
-      return [Rook, Queen].include?(opposite.values.last&.piece.class) if [nil, 0].include?(slope)
-      return [Bishop, Queen].include?(opposite.values.last&.piece.class) if [-1, 1].include?(slope)
+      return [Rook, Queen].include?(opposite.last&.piece.class) if [nil, 0].include?(slope)
+      return [Bishop, Queen].include?(opposite.last&.piece.class) if [-1, 1].include?(slope)
     end
 
-    if path1.values.last.piece == current_king
+    if path1.last.piece == current_king
       check_opposite_end.call(path2)
-    elsif path2.values.last.piece == current_king
+    elsif path2.last.piece == current_king
       check_opposite_end.call(path1)
     else
       false
