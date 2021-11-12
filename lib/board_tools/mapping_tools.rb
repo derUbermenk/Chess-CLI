@@ -76,7 +76,7 @@ module MappingTools
       end
     else
       valid_connections = cell.to_connections.each_with_object([]) do |direction, valid_connections_|
-        valid_connections_.concat(direction.select { |key, cell_| cell_.occupiable_by(current_color) }.keys)
+        valid_connections_.concat(direction.keys.select { |key| @board_db[key].occupiable_by(current_color) })
       end
     end
 
@@ -91,7 +91,7 @@ module MappingTools
       valid_connections_.concat(direction.keys.select do |cell_key|
         # not checked current color, checks if any of the from connections has
         # a piece that is opposite to current color
-        @board_db[cell_key].not_checked_by(opposite_color) && cell.occupiable_by(current_color)
+        cell_ = @board_db[cell_key]
         cell_.not_checked_by(opposite_color) && cell_.occupiable_by(current_color)
       end)
     end
