@@ -442,8 +442,8 @@ describe MappingTools do
       end
       it 'returns the list of all cells up to the first non empty cell' do
         direction = board.make_direction([0,1], [0, 7])
-        correct_path = board.convert_to_cells([[0, 2], [0, 3], [0, 4]]).map(&:key)
-        path = board.get_path(direction).keys
+        correct_path = board.convert_to_cells([[0, 2], [0, 3], [0, 4]])
+        path = board.get_path(direction)
         expect(path).to eq(correct_path)
       end
     end
