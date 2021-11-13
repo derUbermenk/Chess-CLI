@@ -113,6 +113,7 @@ describe Piece do
         additional vertical move" do
           coordinate = [2, 5]
           correct_scope = [[[3, 6]], [[2, 6]], [[1, 6]]]
+          pawn.unmoved = false
           calculated_scope = pawn.scope(coordinate)
 
           expect(calculated_scope).to eq(correct_scope)

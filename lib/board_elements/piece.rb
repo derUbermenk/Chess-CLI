@@ -193,26 +193,11 @@ class Pawn < Piece
     y_direction = @color == :black ? -1 : 1
 
     vertical_move = [[x, y + 1 * y_direction]]
-    vertical_move << [x, y + 2 * y_direction] if unmoved?(coordinate)
+    vertical_move << [x, y + 2 * y_direction] if @unmoved
 
     filter(
       [[[x + 1, (y + 1 * y_direction)]], vertical_move,
        [[x - 1, y + 1 * y_direction]]]
     )
-  end
-
-  private
-
-  # checks if a pawn is unmoved based on the coordinates
-  def unmoved?(coordinate)
-    black = @color == :black
-    white = @color == :white
-    row = coordinate[1]
-
-    if white
-      true if row == 1
-    elsif black
-      true if row == 6
-    end
   end
 end
