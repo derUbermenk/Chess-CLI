@@ -82,6 +82,37 @@ module MappingTools
 
   end
 
+  # filters conections of cells containing pawns
+  def filter_connections_pawn(pawn_cell)
+    return [] if skewed?(pawn_cell)
+
+    forward_connections = pawn_cell.to_connections[1]
+    diagonal_connections = pawn_cell.to_connections.first.merge(pawn_cell.to_connections.last)
+    pawn_color = pawn_cell.piece.color
+
+    # look for forward connections
+    valid_connections = []
+    forward_connections.find do |cell_key, piece|
+      valid_connections << cell_key if piece.nil?
+      !piece.nil?
+    end
+
+    # filter diagonal connections
+    diagonal_connections.each do |cell_key, piece|
+      occupiable = !piece.nil? && piece.color != pawn_color
+      valid_connections << cell_key if occupiable
+    end
+
+    # filter enpeasantable pieces
+    row = @board_cartesian[pawn_cell.coordinate[1]]
+    column = pawn_cell.coordinate[0]
+    # we do column +- 1 to check if a cell is in the edge of board, this warrant no  enpeasant left or right can occur
+    valid_connections << :enpeasant_left if column-1 >= 0 &&  @enpeasantable[opposite_color(pawn_color)] == row[column - 1].key
+    valid_connections << :enpeasant_right if column+1 <= 7 && @enpeasantable[opposite_color(pawn_color)] == row[column + 1].key
+
+    valid_connections
+  end
+
   # connection filter for cells containing king
   def filter_connections_king(king_cell)
     current_color = king_cell.piece.color

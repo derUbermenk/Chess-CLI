@@ -298,6 +298,44 @@ describe MappingTools do
     end
   end
 
+  describe '#filter_connections_pawn' do
+    context 'when no pieces are takeable via the diagonal move' do
+      it 'returns only the key to the forward move' do
+        allow(board).to receive(:king).and_return(db[:a1])
+        board.place(Pawn.new(:white), db[:e2])
+        filtered_connections = board.filter_connections_pawn(db[:e2])
+        expect(filtered_connections).to eq(%i[e3 e4])
+      end
+    end
+
+    it 'gets only the unoccupied keys in forward move' do
+      allow(board).to receive(:king).and_return(db[:a1])
+      board.place(Pawn.new(:black), db[:e7])
+      db[:e7].to_connections = [
+        { f6: nil },
+        { e6: nil, e5: Pawn.new(:white) },
+        { d6: Pawn.new(:white) }
+      ]
+
+      filtered_connections = board.filter_connections_pawn(db[:e7])
+      expect(filtered_connections).to eq(%i[e6 d6])
+    end
+
+    it 'returns enpeasant command if piece an adjacent piece is available for enpeasant' do
+      allow(board).to receive(:king).and_return(db[:a1])
+      board.instance_variable_set(:@enpeasantable, { white: nil, black: :a5 })
+      board.place(Pawn.new(:white), db[:b5])
+      db[:b5].to_connections = [
+        { a6: nil },
+        { b6: nil},
+        { c6: nil }
+      ]
+
+      filtered_connections = board.filter_connections_pawn(db[:b5])
+      expect(filtered_connections).to eq(%i[b6 enpeasant_left])
+    end
+  end
+
   describe '#filter_connections_king' do
     let(:board) { Board.new(empty: true) }
     let(:db) { board.board_db }

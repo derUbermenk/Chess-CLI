@@ -12,7 +12,7 @@ require_relative '../lib/board_tools/setup_tools'
 #   @board_cartesian: array with [0][0] as cell a1 [7][7] as h8
 class Board
   attr_accessor :board_cartesian, :board_db, :pieces
-  attr_reader :king_cells, :cell_connector
+  attr_reader :king_cells, :cell_connector, :enpeasantable
 
   include ChessSymbols
   include MappingTools
@@ -23,8 +23,9 @@ class Board
     @board_db = create_board_db
     @board_cartesian = create_board_cartesian
     @pieces = create_pieces
-    @king_cells = {} # keeps track of the cell containing king
     @cell_connector = CellConnector.new(@board_db)
+    @king_cells = {} # keeps track of the cell containing king
+    @enpeasantable = { white: nil, black: nil }
 
     place_pieces unless empty
   end
@@ -49,6 +50,9 @@ class Board
 
     removal_remap(in_cell)
     place(piece, to_cell)
+
+    # clear -- set to nil the enpeasantable for the opposite color after every move
+    @enpeasantable[waiting_color] = nil
 
     # check if the move caused a check to the king of the other color
     assess_check(waiting_color) unless @king_cells[waiting_color].not_checked_by(moving_color)
@@ -96,7 +100,13 @@ class Board
       pieces_.each do |piece|
         cell = equiv_cell(piece.coordinate)
         piece_id = "#{piece_key}-#{cell.key}"
-        piece_moves[piece_id] = piece.instance_of?(King) ? filter_connections_king(cell) : filter_connections(cell)
+        piece_moves[piece_id] = if piece.instance_of?(King)
+                                  filter_connections_king(cell)
+                                elsif piece.instance_of?(Pawn)
+                                  filter_connections_pawn(cell)
+                                else
+                                  filter_connections(cell)
+                                end
       end
     end
   end
