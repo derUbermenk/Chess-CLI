@@ -352,6 +352,18 @@ describe MappingTools do
         expect(calculated_valid_connections).to eq(expected_valid_connections)
       end
     end
+
+    context 'when a king can castle to right' do
+      it 'returns valid connections with castle_left' do
+        white_king = King.new(:white)
+        white_king_cell = db[:e1]
+        board.place(white_king, white_king_cell)
+        board.place(Rook.new(:white), db[:h1])
+
+        valid_connections = filter_connections_king(white_king_cell)
+        expect(valid_connections).to include(:castle_left)
+      end
+    end
   end
 
   # helpers

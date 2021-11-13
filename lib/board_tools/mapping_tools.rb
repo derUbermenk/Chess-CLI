@@ -83,11 +83,11 @@ module MappingTools
   end
 
   # connection filter for cells containing king
-  def filter_connections_king(cell)
-    current_color = cell.piece.color
+  def filter_connections_king(king_cell)
+    current_color = king_cell.piece.color
     opposite_color = current_color == :white ? :black : :white
 
-    cell.to_connections.each_with_object([]) do |direction, valid_connections_|
+    valid_connections = king_cell.to_connections.each_with_object([]) do |direction, valid_connections_|
       valid_connections_.concat(direction.keys.select do |cell_key|
         # not checked current color, checks if any of the from connections has
         # a piece that is opposite to current color
@@ -95,9 +95,53 @@ module MappingTools
         cell_.not_checked_by(opposite_color) && cell_.occupiable_by(current_color)
       end)
     end
+
+    if king_cell.piece.unmoved
+      path_to_right_rook = get_path(king_cell.coordinate, [king_cell.coordinate[0]+1, king_cell.coordinate[1]])
+      path_to_left_rook = get_path(king_cell.coordinate, [king_cell.coordinate[0]-1, king_cell.coordinate[1]])
+
+      valid_connections << :castle_right if Castling_Assessor.castle_good_right(current_color, path_to_right_rook)
+      valid_connections << :castle_left if Castling_Assessor.castle_good_left(current_color, path_to_left_rook)
+    end
+
+    valid_connections
   end
 
   #### HELPER #####
+
+  class Castling_Assessor
+    # checks if a castling can be done to the right of given cell
+    # @param color [Symbol] color of the piece that is checked for availability of castling
+    # @param path_to_rook [Array] array of cells supposedly leading up to rook
+    def self.castle_good_right(color, path_to_rook)
+      rook = path_to_rook.last.piece
+      correct_size(path_to_rook, 3) && rook_unmoved(rook) && through_cells_unchecked(color, path_to_rook)
+    end
+
+    def self.castle_good_left(color, path_to_rook)
+      rook = path_to_rook.last.piece
+      correct_size(path_to_rook, 4) && rook.unmoved && through_cells_unchecked(color, path_to_rook)
+    end
+
+    def correct_size(path, expected_size)
+      path.size == expected_size
+    end
+
+    def through_cells_unchecked(color, through_cell_path)
+      opposite_color = opposite_color(color)
+      through_cell_path[0..1].all? { |cell| cell.not_checked_by(opposite_color) }
+    end
+
+    def opposite_color(color)
+      color == :white ? :black : :white
+    end
+  end
+
+  # gets the opposite color of the given color
+  # @param color [Symbol]
+  def opposite_color(color)
+    color == :white ? :black : :white
+  end
 
   # converts an array of coodinates(direction)
   # to an array of cells
