@@ -33,9 +33,10 @@ class Board
   # @param to_cell [Cell]
   def move_piece(in_cell, to_cell)
     piece = in_cell.remove_piece
+    piece.unmoved = false
+
     moving_color = piece.color
     waiting_color = opposite_color(moving_color)
-
 
     removal_remap(in_cell)
     place(piece, to_cell)
@@ -138,11 +139,7 @@ class Board
     end
   end
 
-  # gets the opposite color of the given color
-  # @param color [Symbol]
-  def opposite_color(color)
-    color == :white ? :black : :white
-  end
+
 
   # removes a piece in board db
   # @param piece [Piece]

@@ -96,9 +96,9 @@ module MappingTools
       end)
     end
 
-    if king_cell.piece.unmoved
-      path_to_right_rook = get_path(king_cell.coordinate, [king_cell.coordinate[0]+1, king_cell.coordinate[1]])
-      path_to_left_rook = get_path(king_cell.coordinate, [king_cell.coordinate[0]-1, king_cell.coordinate[1]])
+    if king_cell.piece.unmoved && !king_cell.piece.check
+      path_to_right_rook = get_path(make_direction(king_cell.coordinate, [king_cell.coordinate[0]+1, king_cell.coordinate[1]]))
+      path_to_left_rook = get_path(make_direction(king_cell.coordinate, [king_cell.coordinate[0]-1, king_cell.coordinate[1]]))
 
       valid_connections << :castle_right if Castling_Assessor.castle_good_right(current_color, path_to_right_rook)
       valid_connections << :castle_left if Castling_Assessor.castle_good_left(current_color, path_to_left_rook)
@@ -115,24 +115,26 @@ module MappingTools
     # @param path_to_rook [Array] array of cells supposedly leading up to rook
     def self.castle_good_right(color, path_to_rook)
       rook = path_to_rook.last.piece
-      correct_size(path_to_rook, 3) && rook_unmoved(rook) && through_cells_unchecked(color, path_to_rook)
+      correct_size(path_to_rook, 3) && rook&.unmoved && through_cells_unchecked(color, path_to_rook)
     end
 
     def self.castle_good_left(color, path_to_rook)
       rook = path_to_rook.last.piece
-      correct_size(path_to_rook, 4) && rook.unmoved && through_cells_unchecked(color, path_to_rook)
+      self.correct_size(path_to_rook, 4) && rook&.unmoved && self.through_cells_unchecked(color, path_to_rook)
     end
 
-    def correct_size(path, expected_size)
+    private
+
+    def self.correct_size(path, expected_size)
       path.size == expected_size
     end
 
-    def through_cells_unchecked(color, through_cell_path)
+    def self.through_cells_unchecked(color, through_cell_path)
       opposite_color = opposite_color(color)
       through_cell_path[0..1].all? { |cell| cell.not_checked_by(opposite_color) }
     end
 
-    def opposite_color(color)
+    def self.opposite_color(color)
       color == :white ? :black : :white
     end
   end

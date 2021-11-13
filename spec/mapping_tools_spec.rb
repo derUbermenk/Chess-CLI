@@ -354,13 +354,68 @@ describe MappingTools do
     end
 
     context 'when a king can castle to right' do
-      it 'returns valid connections with castle_left' do
+      it 'returns valid connections with castle_right' do
         white_king = King.new(:white)
         white_king_cell = db[:e1]
         board.place(white_king, white_king_cell)
         board.place(Rook.new(:white), db[:h1])
 
-        valid_connections = filter_connections_king(white_king_cell)
+        valid_connections = board.filter_connections_king(white_king_cell)
+        expect(valid_connections).to include(:castle_right)
+      end
+    end
+
+    context 'when a king can castle to left' do
+      it 'returns valid connections with castle_left' do
+        white_king = King.new(:white)
+        white_king_cell = db[:e1]
+        board.place(white_king, white_king_cell)
+        board.place(Rook.new(:white), db[:a1])
+
+        valid_connections = board.filter_connections_king(white_king_cell)
+        expect(valid_connections).to include(:castle_left)
+      end
+    end
+
+    context 'when the rook in the opposite end is of a different color' do
+      it 'returns valid connections with castle_left' do
+        black_king = King.new(:black)
+        black_king_cell = db[:e8]
+        board.place(black_king, black_king_cell)
+        board.place(Rook.new(:white), db[:h8])
+
+        valid_connections = board.filter_connections_king(black_king_cell)
+        expect(valid_connections).to_not include(:castle_right)
+      end
+    end
+
+    context 'when the king is in check' do
+      it 'returns valid connections with castle_left' do
+        black_king = King.new(:black)
+        black_king_cell = db[:e8]
+        board.place(black_king, black_king_cell)
+        board.place(Rook.new(:black), db[:h8])
+        board.place(Rook.new(:black), db[:a8])
+        board.place(Queen.new(:white), db[:e5])
+
+        allow(black_king).to receive(:check).and_return(true)
+        valid_connections = board.filter_connections_king(black_king_cell)
+        expect(valid_connections).to_not include(:castle_right, :castle_left)
+      end
+    end
+
+    context 'when any of the through cells in the path to rook are in check by pieces
+      of different color' do
+      it 'returns false' do
+        black_king = King.new(:black)
+        black_king_cell = db[:e8]
+        board.place(black_king, black_king_cell)
+        board.place(Rook.new(:black), db[:h8])
+        board.place(Rook.new(:black), db[:a8])
+        board.place(Queen.new(:white), db[:f1])
+
+        valid_connections = board.filter_connections_king(black_king_cell)
+        expect(valid_connections).to_not include(:castle_right)
         expect(valid_connections).to include(:castle_left)
       end
     end
