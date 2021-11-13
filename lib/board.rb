@@ -29,6 +29,15 @@ class Board
     place_pieces unless empty
   end
 
+  # with assumption that a castle is indeed possible
+  def castle(king_cell, direction)
+    king_row = @board_cartesian[king_cell.coordinate[1]]
+    case direction
+    when :castle_left then castle_left(king_cell, king_row)
+    when :castle_right then castle_right(king_cell, king_row)
+    end
+  end
+
   # @param in_cell [Cell]
   # @param to_cell [Cell]
   def move_piece(in_cell, to_cell)
@@ -41,6 +50,7 @@ class Board
     removal_remap(in_cell)
     place(piece, to_cell)
 
+    # check if the move caused a check to the king of the other color
     assess_check(waiting_color) unless @king_cells[waiting_color].not_checked_by(moving_color)
   end
 
@@ -139,8 +149,6 @@ class Board
     end
   end
 
-
-
   # removes a piece in board db
   # @param piece [Piece]
   def remove(piece)
@@ -186,6 +194,24 @@ class Board
   end
 
   private  
+
+  # @param king_cell [Cell]
+  # @param king_row [Array] the row where the king is in
+  def castle_left(king_cell, king_row)
+    rook_cell = king_row.first
+
+    move_piece(king_cell, king_row[2])
+    move_piece(rook_cell, king_row[3])
+  end
+
+  # @param king_cell [Cell]
+  # @param king_row [Array] the row where the king is in
+  def castle_right(king_cell, king_row)
+    rook_cell = king_row.last
+
+    move_piece(king_cell, king_row[6])
+    move_piece(rook_cell, king_row[5])
+  end
 
   def format_rows(rows)
     rows = rows.reverse

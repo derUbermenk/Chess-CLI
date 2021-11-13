@@ -5,6 +5,7 @@ require_relative '../lib/board'
 describe Board do
   subject(:board) { described_class.new(empty: true) }
   let(:db) { board.board_db }
+
   describe '#initialize' do
     it 'calls place pieces when the board is initialized' do
       expect_any_instance_of(Board).to receive(:place_pieces)
@@ -15,6 +16,42 @@ describe Board do
       it 'does not call create pieces' do
         expect_any_instance_of(Board).not_to receive(:place_pieces)
         Board.new(empty: true)
+      end
+    end
+  end
+
+  describe '#castle' do
+    context 'when castling to the right' do
+      it 'it castles to do right indeed' do
+        white_king = King.new(:white)
+        white_rook = Rook.new(:white)
+
+        board.place(white_king, db[:e1])
+        board.place(white_rook, db[:h1])
+
+        board.instance_variable_set(:@king_cells, { white: db[:e1], black: db[:e8] })
+
+        board.castle(db[:e1], :castle_right)
+        expect(db[:g1].piece).to eq(white_king)
+        expect(db[:f1].piece).to eq(white_rook)
+        board.show
+      end
+    end
+
+    context 'when castling to the left' do
+      it 'it castles to the left indeed' do
+        black_king = King.new(:black)
+        black_rook = Rook.new(:black)
+
+        board.place(black_king, db[:e8])
+        board.place(black_rook, db[:a8])
+
+        board.instance_variable_set(:@king_cells, { white: db[:e1], black: db[:e8] })
+
+        board.castle(db[:e8], :castle_left)
+        expect(db[:c8].piece).to eq(black_king)
+        expect(db[:d8].piece).to eq(black_rook)
+        board.show
       end
     end
   end

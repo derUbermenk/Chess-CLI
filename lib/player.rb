@@ -49,9 +49,11 @@ class Player
   def execute(move)
     puts 'executing'
     in_cell = @board.board_db[move[:in_cell]]
-    to_cell = @board.board_db[move[:to_cell]]
 
-    board.move_piece(in_cell, to_cell)
+    @board.castle(in_cell, move[:to_cell]) if %i[castle_left castle_right].include?(move[:to_cell])
+
+    to_cell = @board.board_db[move[:to_cell]]
+    @board.move_piece(in_cell, to_cell)
   end
 
   # formats player move in to hash
