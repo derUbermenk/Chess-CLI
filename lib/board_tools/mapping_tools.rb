@@ -96,7 +96,7 @@ module MappingTools
     forward_connections.find do |cell_key, piece|
       # upgrade will be called for to connections in the last row
       if last_row_cell_keys.include?(cell_key) && piece.nil?
-        valid_connections << :promote 
+        valid_connections << "promote_#{cell_key}".to_sym
       elsif piece.nil?
         valid_connections << cell_key
       end
@@ -106,7 +106,11 @@ module MappingTools
     # filter diagonal connections
     diagonal_connections.each do |cell_key, piece|
       occupiable = !piece.nil? && piece.color != pawn_color
-      valid_connections << cell_key if occupiable
+      if last_row_cell_keys.include?(cell_key) && occupiable
+        valid_connections << "promote_#{cell_key}".to_sym
+      elsif occupiable
+        valid_connections << cell_key
+      end
     end
 
     # filter enpeasantable pieces

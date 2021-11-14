@@ -1,7 +1,7 @@
 module ChessIO 
   SAVE_SYNTAX = /^ss-\w+$/
   UNDO_SYNTAX = /^uz$/
-  MOVE_SYNTAX = /^[kqnbrp]-[a-h][1-8]-([a-h][1-8]|enpeasant_(left|right)|castle_(left|right)|promote)$/
+  MOVE_SYNTAX = /^[kqnbrp]-[a-h][1-8]-([a-h][1-8]|enpeasant_(left|right)|castle_(left|right)|promote_[a-h](1|8))$/
 
   def input
     gets.chomp

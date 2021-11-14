@@ -344,7 +344,7 @@ describe MappingTools do
           { d1: nil },
           { e1: Knight.new(:white) }
         ]
-        expected_connections = %i[promote e1]
+        expected_connections = %i[promote_d1 promote_e1]
         filtered_connections = board.filter_connections_pawn(db[:d2])
         expect(filtered_connections).to eq(expected_connections)
       end
@@ -359,7 +359,7 @@ describe MappingTools do
           { c8: nil },
           { d8: nil }
         ]
-        expected_connections = %i[promote]
+        expected_connections = %i[promote_c8]
         filtered_connections = board.filter_connections_pawn(db[:c7])
         expect(filtered_connections).to eq(expected_connections)
       end
