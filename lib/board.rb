@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative '../lib/io/symbols'
+require_relative '../lib/io/io'
 require_relative '../lib/board_elements/cell'
 require_relative '../lib/board_elements/piece'
 require_relative '../lib/board_tools/mapping_tools'
@@ -15,6 +16,7 @@ class Board
   attr_reader :king_cells, :cell_connector, :enpeasantable
 
   include ChessSymbols
+  include ChessIO 
   include MappingTools
   include SetupInstructions
 
@@ -69,7 +71,7 @@ class Board
     place(piece, to_cell)
 
     # set the end piece to enpeasantable if the moving piece is a pawn and it move to places forward
-    @enpeasantable[moving_color] = to_cell.key if (to_cell.coordinate[1] - in_cell.coordinate[1])**2 == 4
+    @enpeasantable[moving_color] = to_cell.key if (Pawn == piece.class) && (to_cell.coordinate[1] - in_cell.coordinate[1])**2 == 4
     # clear -- set to nil the enpeasantable for the opposite color after every move
     @enpeasantable[waiting_color] = nil
 
