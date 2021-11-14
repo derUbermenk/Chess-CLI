@@ -47,6 +47,18 @@ class Game
       player_input = get_player_input
 
       return player_move(player_input) if player_input.match?(MOVE_SYNTAX)
+<<<<<<< HEAD
+=======
+      if save_or_undo(player_input)
+        save(player_input) if player_input.match?(SAVE_SYNTAX)
+        undo_move(player_input) if player_input.match?(UNDO_SYNTAX)
+
+        # then get new player input
+        player_input = get_player_input
+        return player_move(player_input) if player_input.match?(MOVE_SYNTAX)
+      end
+
+>>>>>>> d2299b3 (added functionality for saving game state)
 
       invalid_input_message
       instructions_message

@@ -32,8 +32,11 @@ class Main
     saves = retrieve_saves
     display_load_interface(saves)
 
-    save_index = input.to_i
-    YAML.load(saves[save_index])
+    print 'enter index: '
+    save_index = verify_input(gets.chomp.to_i, "save number must be in #{[*0...saves.size].join(' | ')}\nenter index: ") do |index|
+      [*0...saves.size].include?(index.to_i)
+    end
+    YAML.load(File.read(saves[save_index]))
   end
 
   def retrieve_saves

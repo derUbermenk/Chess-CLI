@@ -35,8 +35,7 @@ module ChessIO
     available_moves.reject! { |cell_key, moves| moves.empty? }
 
     available_moves.each_with_index do |(cell_key, moves), indx|
-      print "#{cell_key}: #{moves.join(' | ')} || " if indx.even?
-      puts "#{cell_key}: #{moves.join(' | ')} \n" if indx.odd?
+      puts "#{cell_key}: |#{moves.join(' ')}|"
     end
 
     puts "\n"
