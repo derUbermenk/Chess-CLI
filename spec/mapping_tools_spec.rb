@@ -334,6 +334,36 @@ describe MappingTools do
       filtered_connections = board.filter_connections_pawn(db[:b5])
       expect(filtered_connections).to eq(%i[b6 enpeasant_left])
     end
+
+    context 'when the pawn is black' do
+      it 'returns an promote command if the only forward connection leads to the last row of the pawn; depends with color' do
+        allow(board).to receive(:skewed?).and_return(false)
+        db[:d2].piece = Pawn.new(:black)
+        db[:d2].to_connections = [
+          { c1: nil },
+          { d1: nil },
+          { e1: Knight.new(:white) }
+        ]
+        expected_connections = %i[promote e1]
+        filtered_connections = board.filter_connections_pawn(db[:d2])
+        expect(filtered_connections).to eq(expected_connections)
+      end
+    end
+
+    context 'when the pawn is white' do
+      it 'returns an promote command if the only forward connection leads to the last row of the pawn; depends with color' do
+        allow(board).to receive(:skewed?).and_return(false)
+        db[:c7].piece = Pawn.new(:white)
+        db[:c7].to_connections = [
+          { b8: Knight.new(:white) },
+          { c8: nil },
+          { d8: nil }
+        ]
+        expected_connections = %i[promote]
+        filtered_connections = board.filter_connections_pawn(db[:c7])
+        expect(filtered_connections).to eq(expected_connections)
+      end
+    end
   end
 
   describe '#filter_connections_king' do

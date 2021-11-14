@@ -90,10 +90,16 @@ module MappingTools
     diagonal_connections = pawn_cell.to_connections.first.merge(pawn_cell.to_connections.last)
     pawn_color = pawn_cell.piece.color
 
-    # look for forward connections
+    # upgrade if in last row; else add the cell key of the forward connection
+    last_row_cell_keys = (pawn_color == :black ? @board_cartesian[0] : @board_cartesian[7]).map(&:key)
     valid_connections = []
     forward_connections.find do |cell_key, piece|
-      valid_connections << cell_key if piece.nil?
+      # upgrade will be called for to connections in the last row
+      if last_row_cell_keys.include?(cell_key) && piece.nil?
+        valid_connections << :promote 
+      elsif piece.nil?
+        valid_connections << cell_key
+      end
       !piece.nil?
     end
 
