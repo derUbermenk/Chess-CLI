@@ -56,6 +56,80 @@ describe Board do
     end
   end
 
+  describe '#enpeasant' do
+    white_pawn = Pawn.new(:white)
+    black_pawn = Pawn.new(:black)
+    context 'when doing enpeasant left' do
+      before do
+        white_king = King.new(:white)
+        black_king = King.new(:black)
+
+        board.pieces = {
+          white: {
+            k: [white_king],
+            p: [white_pawn]
+          },
+          black: {
+            k: [black_king],
+            p: [black_pawn]
+          }
+        }
+
+        board.place(white_king, db[:a1])
+        board.place(black_king, db[:h8])
+        board.instance_variable_set(:@king_cells,  { white: db[:a1], black: db[:h8] }) 
+      end
+
+      it 'moves diagonally and captures piece to left' do
+        board.place(white_pawn, db[:b5])
+        board.place(black_pawn, db[:a5])
+        board.instance_variable_set(:@enpeasantable, { white: nil, black: :a5 })
+        puts "\nBefore enpeasant"
+        board.show
+        board.enpeasant(db[:b5], :enpeasant_left)
+        expect(db[:a6].piece).to eq(white_pawn)
+        expect(db[:a5].piece).to be nil
+        puts "\nAfter enpeasant"
+        board.show
+      end
+    end
+
+    context 'when doing enpeasant right' do
+      before do
+        white_king = King.new(:white)
+        black_king = King.new(:black)
+
+        board.pieces = {
+          white: {
+            k: [white_king],
+            p: [white_pawn]
+          },
+          black: {
+            k: [black_king],
+            p: [black_pawn]
+          }
+        }
+
+        board.place(white_king, db[:a1])
+        board.place(black_king, db[:h8])
+        board.instance_variable_set(:@king_cells,  { white: db[:a1], black: db[:h8] }) 
+      end
+
+      it 'moves diagonally and captures piece to left' do
+        board.place(white_pawn, db[:h4])
+        board.place(black_pawn, db[:g4])
+        board.instance_variable_set(:@enpeasantable, { white: :h4, black: :nil })
+        puts "\nBefore enpeasant"
+        board.show
+        board.enpeasant(db[:g4], :enpeasant_right)
+        expect(db[:h3].piece).to eq(black_pawn)
+        expect(db[:h4].piece).to be nil
+        puts "\nAfter enpeasant"
+        board.show
+      end
+    end
+  end
+
   describe '#move_piece' do
     context "when placing a piece in a cell that causes a check to the king
       of opposite color" do
@@ -79,6 +153,28 @@ describe Board do
         expect { board.move_piece(db[:c5], db[:a4]) }.to change { db[:b6].piece.check }.to(true)
       end
     end
+    
+    context 'when moving a pawn two steps forward' do
+      it 'makes the pawn enpeasantable' do
+        board = Board.new
+        db = board.board_db
+        board.move_piece(db[:a2], db[:a4])
+        expect(board.enpeasantable).to eq({ white: :a4, black: nil })
+      end
+    end
+
+    context 'when moving a piece of opposite color and there was previously an enpeasantble piece' do
+      it 'removes the enpeasantable for the opposite color' do
+        board = Board.new
+        db = board.board_db
+        previous_enpeasantable = { white: :a4, black: nil } 
+        new_enpeasantable = { white: nil, black: :d5 }
+
+        board.move_piece(db[:a2], db[:a4])
+        expect{ board.move_piece(db[:d7], db[:d5]) }.to change{ board.enpeasantable }.from(previous_enpeasantable).to(new_enpeasantable)
+      end
+    end
+
   end
 
   describe '#place' do
@@ -195,7 +291,7 @@ describe Board do
     context 'when calculating the valid moves for a full board' do
       it 'returns the valid moves' do
         board = Board.new
-        p board.valid_moves(:white)
+        puts "Valid Moves: #{board.valid_moves(:white)}"
       end
     end
   end

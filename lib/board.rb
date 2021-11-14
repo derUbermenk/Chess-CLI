@@ -25,7 +25,7 @@ class Board
     @pieces = create_pieces
     @cell_connector = CellConnector.new(@board_db)
     @king_cells = {} # keeps track of the cell containing king
-    @enpeasantable = { white: nil, black: nil }
+    @enpeasantable = { white: nil, black: nil } # symbols
 
     place_pieces unless empty
   end
@@ -36,6 +36,15 @@ class Board
     case direction
     when :castle_left then castle_left(king_cell, king_row)
     when :castle_right then castle_right(king_cell, king_row)
+    end
+  end
+
+  # enpeasants left and right will only be callable when
+  # it is in valid moves
+  def enpeasant(pawn_cell, direction)
+    case direction
+    when :enpeasant_left then enpeasant_left(pawn_cell)
+    when :enpeasant_right then enpeasant_right(pawn_cell)
     end
   end
 
@@ -51,6 +60,8 @@ class Board
     removal_remap(in_cell)
     place(piece, to_cell)
 
+    # set the end piece to enpeasantable if the moving piece is a pawn and it move to places forward
+    @enpeasantable[moving_color] = to_cell.key if (to_cell.coordinate[1] - in_cell.coordinate[1])**2 == 4
     # clear -- set to nil the enpeasantable for the opposite color after every move
     @enpeasantable[waiting_color] = nil
 
@@ -203,7 +214,37 @@ class Board
     end
   end
 
-  private  
+  private
+  #
+  def enpeasant_left(pawn_cell)
+    pawn_color = pawn_cell.piece.color
+    row_inc = pawn_color == :black ? -1 : 1
+    diagonal_left_column = pawn_cell.coordinate[0] - 1
+    diagonal_next_row = pawn_cell.coordinate[1] + row_inc
+
+    destination_cell = @board_cartesian[diagonal_next_row][diagonal_left_column]
+    enpeasantable_cell = @board_db[@enpeasantable[opposite_color(pawn_color)]]
+
+    move_piece(pawn_cell, destination_cell) 
+
+    capture_piece(enpeasantable_cell)
+    removal_remap(enpeasantable_cell)
+  end
+
+  def enpeasant_right(pawn_cell)
+    pawn_color = pawn_cell.piece.color
+    row_inc = pawn_color == :black ? -1 : 1
+    diagonal_left_column = pawn_cell.coordinate[0] + 1
+    diagonal_next_row = pawn_cell.coordinate[1] + row_inc
+
+    destination_cell = @board_cartesian[diagonal_next_row][diagonal_left_column]
+    enpeasantable_cell = @board_db[@enpeasantable[opposite_color(pawn_color)]]
+
+    move_piece(pawn_cell, destination_cell)
+
+    capture_piece(enpeasantable_cell)
+    removal_remap(enpeasantable_cell)
+  end
 
   # @param king_cell [Cell]
   # @param king_row [Array] the row where the king is in

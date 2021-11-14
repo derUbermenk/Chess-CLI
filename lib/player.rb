@@ -50,6 +50,7 @@ class Player
     puts 'executing'
     in_cell = @board.board_db[move[:in_cell]]
 
+    @board.enpeasant(in_cell, move[:to_cell]) if %i[enpeasant_left enpeasant_right].include?(move[:to_cell])
     @board.castle(in_cell, move[:to_cell]) if %i[castle_left castle_right].include?(move[:to_cell])
 
     to_cell = @board.board_db[move[:to_cell]]
