@@ -86,8 +86,15 @@ module MappingTools
   def filter_connections_pawn(pawn_cell)
     return [] if skewed?(pawn_cell)
 
-    forward_connections = pawn_cell.to_connections[1]
-    diagonal_connections = pawn_cell.to_connections.first.merge(pawn_cell.to_connections.last)
+    # this occurs when the pawn cell is at the edge
+    if pawn_cell.to_connections.size == 2 
+      # the forward connection is the connection with key matching an a or h column
+      forward_connections = pawn_cell.to_connections.select { |direction|  direction.keys.first.to_s.match?(/^(a|h)[1-8]$/) }[0]
+      diagonal_connections = pawn_cell.to_connections.reject { |direction| direction.keys.first.to_s.match?(/^(a|h)[1-8]$/) }[0]
+    else
+      forward_connections = pawn_cell.to_connections[1]
+      diagonal_connections = pawn_cell.to_connections.first.merge(pawn_cell.to_connections.last)
+    end
     pawn_color = pawn_cell.piece.color
 
     # upgrade if in last row; else add the cell key of the forward connection

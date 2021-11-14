@@ -523,18 +523,6 @@ describe Board do
           expect { board.assess_check(:white) }.to change{ white_king.check_count }.to(1)
         end
       end
-
-
-    end
-  end
-
-  describe '#something' do
-    it 'does something' do
-      board = Board.new
-      db = board.board_db
-
-      p db[:h2].to_connections
-      p board.filter_connections_pawn(db[:h2])
     end
   end
 end
