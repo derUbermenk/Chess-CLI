@@ -19,7 +19,9 @@ class Game
   end
 
   def play
+    display_line_top
     show_board
+    display_line_bottom
     turn_order until end_game
 
     end_cause
@@ -28,7 +30,9 @@ class Game
   # switches between player to allow for moves
   def turn_order
     player_turn
+    display_line_top
     show_board
+    display_line_bottom
 
     rotate_players
   end
@@ -38,19 +42,9 @@ class Game
   # else assumes that player entered move input
   def player_turn
     loop do
-      puts @board.valid_moves(current_player.color)
-      print 'enter move: '
-      player_input = gets.chomp 
-
-      <<-doc
-      if save_or_undo(player_input) 
-        save(player_input) if player_input.match?(SAVE_SYNTAX)
-        undo_game if player_input.match?(UNDO_SYNTAX)
-
-        # then get a new input
-        player_input = input 
-      end
-      doc
+      show_current_player(current_player)
+      show_available_moves(@board.valid_moves(current_player.color))
+      player_input = get_player_input
 
       return player_move(player_input) if player_input.match?(MOVE_SYNTAX)
 

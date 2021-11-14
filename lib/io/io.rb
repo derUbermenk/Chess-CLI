@@ -25,10 +25,40 @@ module ChessIO
     verify_input(gets.chomp, message) { |input| %i[q n r b].include?(input) }
   end
 
+  def show_current_player(player)
+    puts "\nCurrent Player: #{player.color} | #{player.symbol}"
+    puts "\n"
+  end
+
+  # available moves is a hash
+  def show_available_moves(available_moves)
+    available_moves.reject! { |cell_key, moves| moves.empty? }
+
+    available_moves.each_with_index do |(cell_key, moves), indx|
+      print "#{cell_key}: #{moves.join(' | ')} || " if indx.even?
+      puts "#{cell_key}: #{moves.join(' | ')} \n" if indx.odd?
+    end
+
+    puts "\n"
+  end
+
+  def get_player_input
+    print 'enter move: '
+    gets.chomp
+  end
+
+  def display_line_bottom
+    puts "---------------------------------------------------\n"
+  end
+
+  def display_line_top
+    puts "\n---------------------------------------------------"
+  end
+
   # prints the checkmate message
   # @param winner [Player]
   def checkmate_message(winner)
-    puts "Checkmate! #{winner.name} wins"
+    puts "Checkmate! #{winner.color} | #{winner.symbol} wins"
   end
 
   def stalemate_message
