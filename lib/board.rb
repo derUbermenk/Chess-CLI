@@ -50,11 +50,13 @@ class Board
     end
   end
 
-  def promote(pawn_cell)
+  def promote(pawn_cell, command)
     pawn_color = pawn_cell.piece.color
+    destination_cell_key = command.to_s.split('_')[1].to_sym
+    destination_cell = @board_db[destination_cell_key]
     case pawn_color
-    when :black then promote_black_pawn(pawn_cell, pawn_color) 
-    when :white then promote_white_pawn(pawn_cell, pawn_color) 
+    when :black then promote_black_pawn(pawn_cell, destination_cell, pawn_color) 
+    when :white then promote_white_pawn(pawn_cell, destination_cell, pawn_color) 
     end
   end
 
@@ -226,17 +228,16 @@ class Board
 
   private
 
-  def promote_black_pawn(pawn_cell, pawn_color)
+  def promote_black_pawn(pawn_cell, destination_cell, pawn_color)
     promoted_piece = make_piece(make_piece_prompt, pawn_color) 
     # add the promoted piece to the piece database
     @pieces[pawn_color][promoted_piece.key] << promoted_piece
-    destination_cell = @board_cartesian[0][pawn_cell.coordinate[0]]
 
     place(promoted_piece, pawn_cell)
     move_piece(pawn_cell, destination_cell)
   end
 
-  def promote_white_pawn(pawn_cell, pawn_color)
+  def promote_white_pawn(pawn_cell, destination_cell, pawn_color)
     promoted_piece = make_piece(make_piece_prompt, pawn_color) 
     # add the promoted piece to the piece database
     @pieces[pawn_color][promoted_piece.key] << promoted_piece

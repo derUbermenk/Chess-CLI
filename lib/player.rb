@@ -51,8 +51,8 @@ class Player
 
     if %i[enpeasant_left enpeasant_right].include?(move[:to_cell])
       @board.enpeasant(in_cell, move[:to_cell]) 
-    elsif move[:to_cell] == :promote
-      @board.promote(in_cell)
+    elsif move[:to_cell].to_s.match?(/^promote_[a-h](1|8)$/)
+      @board.promote(in_cell, move[:to_cell])
     elsif %i[castle_left castle_right].include?(move[:to_cell])
       @board.castle(in_cell, move[:to_cell])
     else

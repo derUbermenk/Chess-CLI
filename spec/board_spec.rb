@@ -146,7 +146,7 @@ describe Board do
       puts "\nBoard before upgrade"
       board.show
 
-      board.promote(db[:b7])
+      board.promote(db[:b7], :promote_b8)
       expect(board.pieces[:white][:q].size).to eq(2)
       expect(db[:b8].piece.class).to be(Queen)
       expect(db[:b8].piece.color).to eq(:white)
@@ -171,7 +171,7 @@ describe Board do
       puts "\nBoard before upgrade"
       board.show
 
-      board.promote(db[:e2])
+      board.promote(db[:e2], :promote_e1)
       expect(board.pieces[:black][:n].size).to eq(1)
       expect(db[:e1].piece.class).to be(Knight)
       expect(db[:e1].piece.color).to eq(:black)
