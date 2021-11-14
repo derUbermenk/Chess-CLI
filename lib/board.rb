@@ -48,6 +48,14 @@ class Board
     end
   end
 
+  def promote(pawn_cell)
+    pawn_color = pawn_cell.piece.color
+    case pawn_color
+    when :black then promote_black_pawn(pawn_cell, pawn_color) 
+    when :white then promote_white_pawn(pawn_cell, pawn_color) 
+    end
+  end
+
   # @param in_cell [Cell]
   # @param to_cell [Cell]
   def move_piece(in_cell, to_cell)
@@ -215,6 +223,27 @@ class Board
   end
 
   private
+
+  def promote_black_pawn(pawn_cell, pawn_color)
+    promoted_piece = make_piece(make_piece_prompt, pawn_color) 
+    # add the promoted piece to the piece database
+    @pieces[pawn_color][promoted_piece.key] << promoted_piece
+    destination_cell = @board_cartesian[0][pawn_cell.coordinate[0]]
+
+    place(promoted_piece, pawn_cell)
+    move_piece(pawn_cell, destination_cell)
+  end
+
+  def promote_white_pawn(pawn_cell, pawn_color)
+    promoted_piece = make_piece(make_piece_prompt, pawn_color) 
+    # add the promoted piece to the piece database
+    @pieces[pawn_color][promoted_piece.key] << promoted_piece
+    destination_cell = @board_cartesian[7][pawn_cell.coordinate[0]]
+
+    place(promoted_piece, pawn_cell)
+    move_piece(pawn_cell, destination_cell)
+  end
+
   #
   def enpeasant_left(pawn_cell)
     pawn_color = pawn_cell.piece.color
@@ -229,6 +258,15 @@ class Board
 
     capture_piece(enpeasantable_cell)
     removal_remap(enpeasantable_cell)
+  end
+
+  def make_piece(key, color)
+    case key
+    when :q then Queen.new(color)
+    when :n then Knight.new(color)
+    when :r then Rook.new(color)
+    when :b then Bishop.new(color)
+    end
   end
 
   def enpeasant_right(pawn_cell)

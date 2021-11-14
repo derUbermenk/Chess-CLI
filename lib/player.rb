@@ -47,14 +47,18 @@ class Player
   # @param move [Hash] consisting of keys piece_key, in_cell and to_cell 
   # @param [Hash] cell keys and correspoding cells
   def execute(move)
-    puts 'executing'
     in_cell = @board.board_db[move[:in_cell]]
 
-    @board.enpeasant(in_cell, move[:to_cell]) if %i[enpeasant_left enpeasant_right].include?(move[:to_cell])
-    @board.castle(in_cell, move[:to_cell]) if %i[castle_left castle_right].include?(move[:to_cell])
-
-    to_cell = @board.board_db[move[:to_cell]]
-    @board.move_piece(in_cell, to_cell)
+    if %i[enpeasant_left enpeasant_right].include?(move[:to_cell])
+      @board.enpeasant(in_cell, move[:to_cell]) 
+    elsif move[:to_cell] == :promote
+      @board.promote(in_cell)
+    elsif %i[castle_left castle_right].include?(move[:to_cell])
+      @board.castle(in_cell, move[:to_cell])
+    else
+      to_cell = @board.board_db[move[:to_cell]]
+      @board.move_piece(in_cell, to_cell)
+    end
   end
 
   # formats player move in to hash

@@ -19,6 +19,12 @@ module ChessIO
     end
   end
 
+  def make_piece_prompt
+    message = 'promote pawn to the ff: [Queen: q; Knight: n; Rook: r; Bishop: b]'
+    puts message
+    verify_input(gets.chomp, message) { |input| %i[q n r b].include?(input) }
+  end
+
   # prints the checkmate message
   # @param winner [Player]
   def checkmate_message(winner)

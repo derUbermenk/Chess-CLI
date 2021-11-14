@@ -130,6 +130,58 @@ describe Board do
     end
   end
 
+  describe '#promote' do
+    it 'adds the promoted piece to the piece database and moves promoted piece to destination cell' do
+      allow(board).to receive(:make_piece_prompt).and_return(:q)
+      white_pawn = Pawn.new(:white)
+      board.instance_variable_set(:@king_cells, { white: db[:h8], black: db[:g7] })
+      board.pieces = {
+        white: {
+          q: [Queen.new(:white)],
+          p: [white_pawn]
+        }
+      }
+      board.place(white_pawn, db[:b7])
+
+      puts "\nBoard before upgrade"
+      board.show
+
+      board.promote(db[:b7])
+      expect(board.pieces[:white][:q].size).to eq(2)
+      expect(db[:b8].piece.class).to be(Queen)
+      expect(db[:b8].piece.color).to eq(:white)
+
+      puts "\nBoard after upgrade"
+      board.show
+    end
+
+    it 'adds the promoted piece to the piece database and moves promoted piece to destination cell' do
+      allow(board).to receive(:make_piece_prompt).and_return(:n)
+      black_pawn = Pawn.new(:black)
+      board.instance_variable_set(:@king_cells, { white: db[:h8], black: db[:g7] })
+      board.pieces = {
+        black: {
+          n: [],
+          p: [black_pawn]
+        }
+      }
+
+      board.place(black_pawn, db[:e2])
+
+      puts "\nBoard before upgrade"
+      board.show
+
+      board.promote(db[:e2])
+      expect(board.pieces[:black][:n].size).to eq(1)
+      expect(db[:e1].piece.class).to be(Knight)
+      expect(db[:e1].piece.color).to eq(:black)
+
+      puts "\nBoard after upgrade"
+      board.show
+
+    end
+  end
+
   describe '#move_piece' do
     context "when placing a piece in a cell that causes a check to the king
       of opposite color" do
