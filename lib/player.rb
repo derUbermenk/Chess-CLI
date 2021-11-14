@@ -9,6 +9,7 @@ class Player
   include ChessIO
 
   attr_accessor :color
+  attr_reader :symbol
 
   # @param color [String]
   # @param king [King]
@@ -17,6 +18,7 @@ class Player
     @color = color
     @king = king
     @board = board
+    @symbol = @color == :black ? "\u25cb" : "\u25cf"
   end
 
   # verifies and updates pieces if player_move is valid
@@ -27,7 +29,7 @@ class Player
       valid(player_move)
       return execute(player_move) if valid(player_move)
 
-      input = verify_input('', 'invalid move') do |player_input|
+      input = verify_input('', 'invalid move, enter new move: ') do |player_input|
         player_input.match?(MOVE_SYNTAX)
       end
     end
